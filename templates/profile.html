@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <div class="profile-breadcrumb">
+        <a href="{{ url_for('index') }}">ДОМОЙ</a> / <a href="#">МОЙ АККАУНТ</a>
+    </div>
+    
+    <div class="profile-container">
+        <div class="profile-sidebar">
+            <h3>ИЗМЕНИТЬ МОЙ АККАУНТ</h3>
+            <ul>
+                <li><a href="{{ url_for('profile') }}" class="active">ВАШ ПРОФИЛЬ</a></li>
+                <li><a href="#">ВАШ АДРЕС</a></li>
+                <li><a href="{{ url_for('cards_list') }}">ВАША КАРТА</a></li>
+                <li><a href="{{ url_for('cart') }}">КОРЗИНА</a></li>
+                <li><a href="{{ url_for('wishlist') }}">ОТЛОЖЕННЫЕ</a></li>
+            </ul>
+        </div>
+        
+        <div class="profile-content">
+            <h2>ИЗМЕНИТЬ НАСТРОЙКИ ПРОФИЛЯ</h2>
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="form-group">
+                    <label>Имя</label>
+                    <input type="text" name="username" value="{{ current_user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Почта</label>
+                    <input type="email" value="{{ current_user.email }}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" name="phone" value="{{ current_user.phone or '' }}" placeholder="Введите телефон">
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <textarea name="address" placeholder="Введите ваш адрес">{{ current_user.address or '' }}</textarea>
+                </div>
+                
+                <h3 class="password-title">НАСТРОЙТЕ СВОЙ ПАРОЛЬ</h3>
+                <div class="form-group">
+                    <label>Новый пароль</label>
+                    <input type="password" name="new_password" placeholder="Новый пароль">
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите пароль</label>
+                    <input type="password" name="confirm_password" placeholder="Подтвердите новый пароль">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="history.back()">ОТМЕНА</button>
+                    <button type="submit" class="btn-primary">СОХРАНИТЬ НАСТРОЙКИ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.profile-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.profile-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.profile-breadcrumb a:hover {
+    color: #cc0000;
+}
+.profile-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+}
+.profile-sidebar {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    height: fit-content;
+}
+.profile-sidebar h3 {
+    font-size: 1.2rem;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+.profile-sidebar ul {
+    list-style: none;
+}
+.profile-sidebar li a {
+    display: block;
+    padding: 12px 0;
+    color: #666;
+    text-decoration: none;
+    border-bottom: 1px solid #eee;
+    transition: color 0.3s;
+}
+.profile-sidebar li a:hover,
+.profile-sidebar li a.active {
+    color: #cc0000;
+}
+.profile-content {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+.profile-content h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #cc0000;
+    display: inline-block;
+}
+.profile-content .form-group {
+    margin-bottom: 20px;
+}
+.profile-content .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+.profile-content .form-group input,
+.profile-content .form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.95rem;
+}
+.profile-content .form-group input:focus,
+.profile-content .form-group textarea:focus {
+    outline: none;
+    border-color: #cc0000;
+}
+.profile-content .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+.password-title {
+    font-size: 1.1rem;
+    margin: 25px 0 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    color: #1a1a1a;
+}
+.form-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+.btn-cancel {
+    background: #eee;
+    color: #666;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+.btn-cancel:hover {
+    background: #ddd;
+}
+.btn-primary {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+.btn-primary:hover {
+    background: #ff1a1a;
+}
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+    .btn-cancel, .btn-primary {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

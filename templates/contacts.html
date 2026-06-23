@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Контакты{% endblock %}
+
+{% block content %}
+<div class="contacts-wrapper">
+    <div class="contacts-breadcrumb">
+        <a href="{{ url_for('index') }}">ДОМОЙ</a> / <a href="#">КОНТАКТЫ</a>
+    </div>
+    
+    <h1 class="contacts-title">СВЯЗАТЬСЯ С НАМИ</h1>
+    <p class="contacts-subtitle">Мы всегда на связи 24/7.</p>
+    
+    <div class="contacts-grid">
+        <div class="contacts-info">
+            <div class="contact-card">
+                <i class="fas fa-phone"></i>
+                <h3>PHONE:</h3>
+                <p>+676-4242-5252</p>
+            </div>
+            <div class="contact-card">
+                <i class="fas fa-envelope"></i>
+                <h3>НАПИСАТЬ НАМ</h3>
+                <p>ПОЧТА: CUSTOMER@EXCLUSIVE.COM</p>
+                <p>ДОП.ПОЧТА: SUPPORT@EXCLUSIVE.COM</p>
+            </div>
+        </div>
+        
+        <div class="contacts-form">
+            <h3>Написать нам</h3>
+            <form id="contactForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" name="name" placeholder="ВАШЕ ИМЯ *" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" name="email" placeholder="ВАША ПОЧТА *" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" name="phone" placeholder="ВАШ НОМЕР *" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="ВАШЕ СООБЩЕНИЕ..." rows="5" required></textarea>
+                </div>
+                <button type="submit" class="send-btn">Отправить</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="contacts-footer-links">
+        <p>Другие настройки</p>
+        <p>exclusive@gmail.com</p>
+        <p>+676-4242-5252</p>
+    </div>
+</div>
+
+<style>
+.contacts-wrapper {
+    padding: 40px 0;
+}
+
+.contacts-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.contacts-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+
+.contacts-breadcrumb a:hover {
+    color: #cc0000;
+}
+
+.contacts-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.contacts-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 50px;
+}
+
+.contacts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.contacts-info {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+
+.contact-card {
+    margin-bottom: 30px;
+}
+
+.contact-card i {
+    font-size: 2rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+
+.contact-card h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+}
+
+.contact-card p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0;
+}
+
+.contacts-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+
+.contacts-form h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #cc0000;
+}
+
+.send-btn {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background 0.3s;
+}
+
+.send-btn:hover {
+    background: #ff1a1a;
+}
+
+.contacts-footer-links {
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+}
+
+.contacts-footer-links p {
+    color: #999;
+    font-size: 0.8rem;
+    margin: 5px 0;
+}
+
+.contacts-footer-links p:first-child {
+    color: #cc0000;
+}
+
+@media (max-width: 768px) {
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

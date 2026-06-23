@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Приватность{% endblock %}
+
+{% block content %}
+<div class="privacy-wrapper">
+    <div class="privacy-breadcrumb">
+        <a href="{{ url_for('index') }}">ДОМОЙ</a> / <a href="#">ПРИВАТНОСТЬ</a>
+    </div>
+    
+    <h1 class="privacy-title">НАСТРОЙКИ ПРИВАТНОСТИ</h1>
+    
+    <div class="privacy-container">
+        <div class="privacy-card">
+            <i class="fas fa-user-secret"></i>
+            <h3>Конфиденциальность данных</h3>
+            <p>Мы не передаем ваши личные данные третьим лицам.</p>
+        </div>
+        <div class="privacy-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Безопасность</h3>
+            <p>Ваши данные защищены с помощью современных технологий шифрования.</p>
+        </div>
+        <div class="privacy-card">
+            <i class="fas fa-cookie-bite"></i>
+            <h3>Файлы cookie</h3>
+            <p>Сайт использует cookies для улучшения работы.</p>
+        </div>
+        <div class="privacy-card">
+            <i class="fas fa-envelope"></i>
+            <h3>Рассылка</h3>
+            <p>Вы можете отписаться от рассылки в любой момент.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.privacy-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.privacy-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.privacy-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.privacy-breadcrumb a:hover {
+    color: #cc0000;
+}
+.privacy-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+}
+.privacy-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+.privacy-card {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    text-align: center;
+    transition: transform 0.3s;
+}
+.privacy-card:hover {
+    transform: translateY(-5px);
+}
+.privacy-card i {
+    font-size: 2.5rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.privacy-card h3 {
+    margin-bottom: 10px;
+    color: #1a1a1a;
+}
+.privacy-card p {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+@media (max-width: 768px) {
+    .privacy-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

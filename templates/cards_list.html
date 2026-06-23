@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Мои карты{% endblock %}
+
+{% block content %}
+<div class="cards-wrapper">
+    <div class="cards-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">МОИ КАРТЫ</a>
+    </div>
+
+    <div class="cards-header">
+        <h1>ВАШИ КАРТЫ</h1>
+        <a href="{{ url_for('card') }}" class="add-card-btn">+ ДОБАВИТЬ НОВУЮ КАРТУ</a>
+    </div>
+
+    <div id="cardsList" class="cards-grid">
+        <!-- Карты будут загружены из localStorage -->
+    </div>
+
+    <div class="cards-security">
+        <i class="fas fa-lock"></i>
+        <p>Ваши данные защищены. Карты хранятся в зашифрованном виде.</p>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteCardModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <i class="fas fa-trash-alt"></i>
+            <h3>Удаление карты</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p>Вы уверены, что хотите удалить эту карту?</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-cancel" onclick="closeDeleteCardModal()">Нет</button>
+            <button class="modal-confirm" id="confirmDeleteCardBtn">Да, удалить</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.cards-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.cards-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.cards-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.cards-breadcrumb a:hover {
+    color: #cc0000;
+}
+.cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.cards-header h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+}
+.add-card-btn {
+    background: #1a1a1a;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+.add-card-btn:hover {
+    background: #cc0000;
+}
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+.card-item {
+    background: linear-gradient(135deg, #1a237e, #283593);
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    position: relative;
+    transition: transform 0.3s;
+}
+.card-item:hover {
+    transform: translateY(-5px);
+}
+.visa-card { background: linear-gradient(135deg, #1a237e, #283593); }
+.mastercard-card { background: linear-gradient(135deg, #b71c1c, #c62828); }
+.mir-card { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+.card-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    font-size: 1.2rem;
+}
+.card-type i { font-size: 2rem; }
+.card-number {
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    font-family: monospace;
+}
+.card-holder {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+.card-expiry { font-size: 0.8rem; opacity: 0.7; }
+.card-default-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.6rem;
+    font-weight: bold;
+}
+.card-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+.card-delete {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+.card-delete:hover { background: #ff4444; }
+.empty-cards {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    grid-column: 1 / -1;
+}
+.empty-cards i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+.empty-cards p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #666;
+}
+.cards-security {
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.cards-security i { font-size: 1.2rem; color: #28a745; }
+.cards-security p { color: #666; font-size: 0.8rem; }
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.custom-modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s;
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.custom-modal-header {
+    background: #cc0000;
+    padding: 20px;
+    text-align: center;
+    color: white;
+}
+.custom-modal-header i { font-size: 2.5rem; margin-bottom: 10px; }
+.custom-modal-header h3 { margin: 0; font-size: 1.2rem; }
+.custom-modal-body { padding: 25px; text-align: center; }
+.custom-modal-body p { font-size: 1rem; color: #333; }
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.modal-cancel, .modal-confirm {
+    padding: 10px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+}
+.modal-cancel { background: #eee; color: #666; }
+.modal-cancel:hover { background: #ddd; }
+.modal-confirm { background: #cc0000; color: white; }
+.modal-confirm:hover { background: #ff1a1a; }
+@media (max-width: 768px) {
+    .cards-header { flex-direction: column; text-align: center; }
+    .cards-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<script>
+let cardToDelete = null;
+
+function loadCards() {
+    const cards = JSON.parse(localStorage.getItem('userCards') || '[]');
+    const cardsList = document.getElementById('cardsList');
+    
+    if (cards.length === 0) {
+        cardsList.innerHTML = `
+            <div class="empty-cards">
+                <i class="far fa-credit-card"></i>
+                <p>У вас пока нет привязанных карт</p>
+                <a href="{{ url_for('card') }}" class="btn-primary">Добавить карту</a>
+            </div>
+        `;
+        return;
+    }
+    
+    cardsList.innerHTML = '';
+    cards.forEach((card, index) => {
+        const cardClass = card.type === 'visa' ? 'visa-card' : (card.type === 'mastercard' ? 'mastercard-card' : 'mir-card');
+        const cardIcon = card.type === 'visa' ? 'fab fa-cc-visa' : (card.type === 'mastercard' ? 'fab fa-cc-mastercard' : 'fab fa-cc-mir');
+        const cardTypeName = card.type === 'visa' ? 'Visa' : (card.type === 'mastercard' ? 'Mastercard' : 'МИР');
+        
+        const cardElement = document.createElement('div');
+        cardElement.className = `card-item ${cardClass}`;
+        cardElement.innerHTML = `
+            <div class="card-type">
+                <i class="${cardIcon}"></i>
+                <span>${cardTypeName}</span>
+            </div>
+            <div class="card-number">**** **** **** ${card.number.slice(-4)}</div>
+            <div class="card-holder">${card.holder}</div>
+            <div class="card-expiry">${card.expiry}</div>
+            ${index === 0 ? '<div class="card-default-badge">ОСНОВНАЯ</div>' : ''}
+            <div class="card-actions">
+                <button class="card-delete" onclick="showDeleteCardConfirm(${index})">Удалить</button>
+            </div>
+        `;
+        cardsList.appendChild(cardElement);
+    });
+}
+
+function showDeleteCardConfirm(cardIndex) {
+    cardToDelete = cardIndex;
+    document.getElementById('deleteCardModal').style.display = 'flex';
+}
+
+function closeDeleteCardModal() {
+    document.getElementById('deleteCardModal').style.display = 'none';
+    cardToDelete = null;
+}
+
+document.getElementById('confirmDeleteCardBtn')?.addEventListener('click', function() {
+    if (cardToDelete !== null) {
+        const cards = JSON.parse(localStorage.getItem('userCards') || '[]');
+        cards.splice(cardToDelete, 1);
+        localStorage.setItem('userCards', JSON.stringify(cards));
+        closeDeleteCardModal();
+        loadCards();
+        showNotification('Карта удалена', 'error');
+    }
+});
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-trash-alt'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+loadCards();
+
+const style = document.createElement('style');
+style.textContent = `
+    .custom-notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #1a1a1a;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        z-index: 2000;
+        transform: translateX(150%);
+        transition: transform 0.3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .custom-notification.show { transform: translateX(0); }
+    .custom-notification.success { border-left: 4px solid #4caf50; }
+    .custom-notification.error { border-left: 4px solid #ff4444; }
+    .notification-content { display: flex; align-items: center; gap: 10px; }
+    .notification-content i { font-size: 1.2rem; }
+    .btn-primary {
+        display: inline-block;
+        background: #cc0000;
+        color: white;
+        padding: 10px 25px;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: bold;
+    }
+    .btn-primary:hover { background: #ff1a1a; }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,469 @@
+{% extends "base.html" %}
+
+{% block title %}О нас{% endblock %}
+
+{% block content %}
+<div class="about-wrapper">
+    <!-- Хлебные крошки -->
+    <div class="about-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">О НАС</a>
+    </div>
+
+    <!-- Блок с текстом и фоткой -->
+    <div class="about-content-row">
+        <div class="about-left">
+            <h1 class="about-title">О НАС... (АНАНАС...<br>АНАНАС ТОЖЕ УХОДИТ)</h1>
+            <div class="about-text">
+                <p>Мы помогаем винтажным магазинам создать узнаваемый образ в сети, разрабатывая сайты, которые подчеркивают уникальность каждой вещи. Наша команда из четырех человек — программисты, дизайнер и ваш персональный управляющий-заказчик — работает над тем, чтобы ваш каталог с моделями стал виртуальным пространством, где хочется находиться и совершать покупки.</p>
+            </div>
+        </div>
+        <div class="about-image">
+            <img src="{{ url_for('static', filename='images/team/about-banner.jpg') }}" 
+                 alt="Наша команда"
+                 class="about-team-image"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="about-placeholder" style="display: none;">
+                <i class="fas fa-users"></i>
+                <span>НАША КОМАНДА</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Большая фотка на всю ширину (баннер) -->
+    <div class="about-big-banner">
+        <img src="{{ url_for('static', filename='images/vintage-collection.jpg') }}" 
+             alt="Винтажная коллекция"
+             class="about-banner-image"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="about-big-placeholder" style="display: none;">
+            <i class="fas fa-image"></i>
+            <span>ВИНТАЖНАЯ КОЛЛЕКЦИЯ</span>
+        </div>
+    </div>
+
+    <!-- Блок с сотрудниками и цитатами -->
+    <div class="about-team-section">
+        <div class="team-members">
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-photo">
+                        <img src="{{ url_for('static', filename='images/team/dana.jpg') }}" 
+                             alt="Дана Доритос"
+                             class="team-member-image"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="team-placeholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>ДАНА ДОРИТОС</h3>
+                    <p>БЭКЕНД-РАЗРАБОТЧИК</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <img src="{{ url_for('static', filename='images/team/zarina.jpg') }}" 
+                             alt="Зарина Зефирко"
+                             class="team-member-image"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="team-placeholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>ЗАРИНА ЗЕФИРКО</h3>
+                    <p>ДИЗАЙНЕР</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <img src="{{ url_for('static', filename='images/team/timur.jpg') }}" 
+                             alt="Тимур Точков"
+                             class="team-member-image"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="team-placeholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>ТИМУР ТОЧКОВ</h3>
+                    <p>РУКОВОДИТЕЛЬ-УПРАВЛЯЮЩИЙ</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-photo">
+                        <img src="{{ url_for('static', filename='images/team/victoria.jpg') }}" 
+                             alt="Виктория Юнминовна"
+                             class="team-member-image"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="team-placeholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>ВИКТОРИЯ ЮНМИНОВНА</h3>
+                    <p>ФРОНТЕНД-РАЗРАБОЧЕК</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="team-quotes">
+            <h2>ИНТЕРЕСНЫЕ ЦИТАТЫ<br>НАШИХ СОТРУДНИКОВ</h2>
+            <div class="quotes-list">
+                <div class="quote-item">
+                    <h4>ДАНА ДОРИТОС:</h4>
+                    <p>"СРОК ГОДНОСТИ ДО 20.. ψ(｀∇´)ψ"</p>
+                </div>
+                <div class="quote-item">
+                    <h4>ЗАРИНА ЗЕФИРКО:</h4>
+                    <p>"Ведь моё тело - убийца, и любовь - пистолет, не пытайся влюбиться, если хочешь жить..o(*￣▽￣*)ブ"</p>
+                </div>
+                <div class="quote-item">
+                    <h4>ТИМУР ТОЧКОВ:</h4>
+                    <p>"он не был популярным фембойчиком, но в яой фандомах его знали все..o(*^＠^*)o"</p>
+                </div>
+                <div class="quote-item">
+                    <h4>ВИКТОРИЯ ЮНМИНОВНА:</h4>
+                    <p>"давай покончим с этим и продолжим наше путешествие.. ( •̀ .̫ •́ )✧"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Надпись DEADSTOCK DARLING ниже -->
+    <div class="about-footer-text">
+        <div class="footer-brand">
+            <i class="fas fa-tshirt"></i>
+            <span>DEADSTOCK DARLING</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.about-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.about-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.about-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.about-breadcrumb a:hover {
+    color: #cc0000;
+}
+.about-content-row {
+    display: flex;
+    gap: 50px;
+    margin-bottom: 60px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.about-left {
+    flex: 1.2;
+}
+.about-title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    line-height: 1.3;
+    color: #1a1a1a;
+    margin-bottom: 25px;
+    text-align: left;
+}
+.about-text p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+}
+.about-image {
+    flex: 0.8;
+}
+.about-team-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.about-placeholder {
+    background: #f5f5f5;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+.about-placeholder i {
+    font-size: 4rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.about-placeholder span {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: #666;
+}
+.about-big-banner {
+    margin: 50px 0 60px;
+}
+.about-banner-image {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 15px;
+}
+.about-big-placeholder {
+    background: #f5f5f5;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+.about-big-placeholder i {
+    font-size: 5rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.about-big-placeholder span {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: #666;
+}
+.about-team-section {
+    display: flex;
+    gap: 50px;
+    flex-wrap: wrap;
+    margin-bottom: 60px;
+}
+.team-members {
+    flex: 1;
+}
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+.team-card {
+    text-align: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+.team-photo {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+}
+.team-member-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #cc0000;
+    transition: all 0.3s ease;
+}
+.team-card:hover .team-member-image {
+    transform: scale(1.05);
+    border-color: #ff4444;
+}
+.team-placeholder {
+    width: 120px;
+    height: 120px;
+    background: #e0e0e0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+.team-placeholder i {
+    font-size: 3rem;
+    color: #cc0000;
+}
+.team-card:hover .team-placeholder {
+    background: #d4a574;
+    transform: scale(1.05);
+}
+.team-card h3 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #1a1a1a;
+}
+.team-card p {
+    font-size: 0.7rem;
+    color: #cc0000;
+    letter-spacing: 1px;
+}
+.team-quotes {
+    flex: 1;
+}
+.team-quotes h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 25px;
+    line-height: 1.3;
+    color: #1a1a1a;
+}
+.quotes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.quote-item {
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border-left: 4px solid #cc0000;
+    transition: all 0.3s ease;
+}
+.quote-item:hover {
+    transform: translateX(5px);
+    background: #fff0f0;
+}
+.quote-item h4 {
+    font-size: 0.9rem;
+    color: #cc0000;
+    margin-bottom: 8px;
+}
+.quote-item p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #444;
+}
+.about-footer-text {
+    text-align: center;
+    padding: 40px 0 20px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+}
+.footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #f5f5f5;
+    padding: 15px 30px;
+    border-radius: 50px;
+    border: 1px solid #eee;
+}
+.footer-brand i {
+    font-size: 1.5rem;
+    color: #cc0000;
+}
+.footer-brand span {
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+/* Темная тема */
+body.dark-theme .about-title {
+    color: #e0e0e0;
+}
+body.dark-theme .about-text p {
+    color: #aaa;
+}
+body.dark-theme .about-placeholder {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .about-placeholder span {
+    color: #aaa;
+}
+body.dark-theme .about-big-placeholder {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .about-big-placeholder span {
+    color: #aaa;
+}
+body.dark-theme .team-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .team-card h3 {
+    color: #e0e0e0;
+}
+body.dark-theme .quote-item {
+    background: #2a2a2a;
+}
+body.dark-theme .quote-item p {
+    color: #aaa;
+}
+body.dark-theme .footer-brand {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .footer-brand span {
+    color: #e0e0e0;
+}
+body.dark-theme .team-placeholder {
+    background: #444;
+}
+body.dark-theme .team-member-image {
+    border-color: #ff6666;
+}
+@media (max-width: 768px) {
+    .about-content-row {
+        flex-direction: column;
+    }
+    .about-team-section {
+        flex-direction: column;
+    }
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    .team-member-image {
+        width: 80px;
+        height: 80px;
+    }
+    .team-placeholder {
+        width: 80px;
+        height: 80px;
+    }
+    .team-placeholder i {
+        font-size: 2rem;
+    }
+    .about-title {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+    .about-text p {
+        font-size: 0.9rem;
+        text-align: center;
+    }
+    .about-team-image {
+        height: 200px;
+    }
+    .about-banner-image {
+        height: 200px;
+    }
+    .footer-brand {
+        padding: 12px 20px;
+    }
+    .footer-brand span {
+        font-size: 1rem;
+        letter-spacing: 2px;
+    }
+}
+@media (max-width: 480px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    .team-quotes h2 {
+        font-size: 1.2rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-left">
+        <img src="{{ url_for('static', filename='images/banners/login-banner.jpg') }}" 
+             alt="Deadstock Darling"
+             class="login-full-image">
+    </div>
+    <div class="login-right">
+        <div class="login-card">
+            <h2>ВОЙТИ В АККАУНТ</h2>
+            <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Почта или номер телефона" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Пароль" required>
+                </div>
+                <button type="submit" class="login-btn">ВОЙТИ</button>
+            </form>
+            <div class="login-divider">
+                <span>Или</span>
+            </div>
+            <div class="google-login">
+                <a href="#" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon">
+                    <span>Войти через Google</span>
+                </a>
+            </div>
+            <p class="login-forgot">
+                <a href="#">ЗАБЫЛИ ПАРОЛЬ?</a>
+            </p>
+            <p class="login-register-link">
+                НЕТ АККАУНТА? <a href="{{ url_for('register') }}">СОЗДАТЬ</a>
+            </p>
+            <div class="login-footer">
+                <p>Другие настройки</p>
+                <p class="contacts-footer">exclusive@gmail.com</p>
+                <p class="contacts-footer">+676-4242-5252</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.login-container {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    margin: 30px 0;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.login-left {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 550px;
+    background: #1a1a1a;
+}
+
+.login-full-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.login-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: #ffffff;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-card h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    color: #1a1a1a;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: #ffffff;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #cc0000;
+    box-shadow: 0 0 0 2px rgba(204,0,0,0.1);
+}
+
+.login-btn {
+    width: 100%;
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.login-btn:hover {
+    background: #ff1a1a;
+}
+
+.login-divider {
+    text-align: center;
+    margin: 25px 0 20px;
+    position: relative;
+}
+
+.login-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e0e0e0;
+}
+
+.login-divider span {
+    background: #ffffff;
+    padding: 0 15px;
+    position: relative;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.google-login {
+    margin-bottom: 25px;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.google-btn:hover {
+    border-color: #cc0000;
+    background: #fafafa;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.google-btn span {
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.google-btn:hover span {
+    color: #cc0000;
+}
+
+.login-forgot {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.login-forgot a {
+    color: #999;
+    text-decoration: none;
+    font-size: 0.8rem;
+}
+
+.login-forgot a:hover {
+    color: #cc0000;
+}
+
+.login-register-link {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 0.9rem;
+}
+
+.login-register-link a {
+    color: #cc0000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-register-link a:hover {
+    text-decoration: underline;
+}
+
+.login-footer {
+    margin-top: 40px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.login-footer p {
+    color: #999;
+    font-size: 0.75rem;
+    margin: 5px 0;
+}
+
+.contacts-footer {
+    color: #cc0000 !important;
+}
+
+/* Темная тема */
+body.dark-theme .login-container {
+    background: #1a1a1a;
+}
+
+body.dark-theme .login-right {
+    background: #1a1a1a;
+}
+
+body.dark-theme .login-card h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-group input {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-group input:focus {
+    border-color: #ff6666;
+}
+
+body.dark-theme .login-divider::before {
+    background: #444;
+}
+
+body.dark-theme .login-divider span {
+    background: #1a1a1a;
+    color: #aaa;
+}
+
+body.dark-theme .google-btn {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .google-btn span {
+    color: #e0e0e0;
+}
+
+body.dark-theme .google-btn:hover {
+    border-color: #ff6666;
+}
+
+body.dark-theme .login-footer {
+    border-top-color: #444;
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+        margin: 20px;
+    }
+    
+    .login-left {
+        min-height: 300px;
+    }
+    
+    .login-right {
+        padding: 30px 20px;
+    }
+    
+    .login-card h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %}

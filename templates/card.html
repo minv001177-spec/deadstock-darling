@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}Привязка карты{% endblock %}
+
+{% block content %}
+<div class="card-wrapper">
+    <div class="card-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">ПРИВЯЗКА КАРТЫ</a>
+    </div>
+
+    <div class="card-container">
+        <div class="card-form-section">
+            <h2>Привязать банковскую карту</h2>
+            <p class="card-subtitle">Для быстрых и безопасных покупок</p>
+            
+            <form class="card-form" id="cardForm">
+                <div class="form-group">
+                    <label>Номер карты</label>
+                    <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+                    <i class="fas fa-credit-card card-icon"></i>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Срок действия</label>
+                        <input type="text" id="cardExpiry" placeholder="ММ/ГГ" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV/CVC</label>
+                        <input type="password" id="cardCvv" placeholder="***" maxlength="3">
+                        <div class="cvv-tooltip">
+                            <i class="fas fa-question-circle"></i>
+                            <span>3 цифры на обратной стороне карты</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Имя держателя</label>
+                    <input type="text" id="cardName" placeholder="ИМЯ ФАМИЛИЯ">
+                </div>
+                
+                <div class="form-group">
+                    <label>Тип карты</label>
+                    <select id="cardType">
+                        <option value="visa">Visa</option>
+                        <option value="mastercard">Mastercard</option>
+                        <option value="mir">МИР</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="card-submit-btn">ПРИВЯЗАТЬ КАРТУ</button>
+            </form>
+            
+            <div class="card-security">
+                <i class="fas fa-lock"></i>
+                <span>Ваши данные защищены. Платежи проходят через защищенное соединение.</span>
+            </div>
+        </div>
+        
+        <div class="card-benefits">
+            <h3>Преимущества привязки карты:</h3>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> Быстрая оплата в один клик</li>
+                <li><i class="fas fa-check-circle"></i> Сохранение истории покупок</li>
+                <li><i class="fas fa-check-circle"></i> Эксклюзивные скидки для держателей карт</li>
+                <li><i class="fas fa-check-circle"></i> Бесплатная доставка от 1500₽</li>
+            </ul>
+            <div class="card-icons">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-mir"></i>
+                <i class="fab fa-cc-amex"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-footer-settings">
+        <p>Другие настройки</p>
+        <p>exclusive@gmail.com</p>
+        <p>+676-4242-5252</p>
+    </div>
+</div>
+
+<!-- Модальное окно успеха -->
+<div id="successModal" class="custom-modal">
+    <div class="custom-modal-content success-modal">
+        <div class="custom-modal-header success">
+            <i class="fas fa-check-circle"></i>
+            <h3>Карта успешно привязана!</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p>Теперь вы можете быстро оплачивать покупки</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-confirm" onclick="closeSuccessModal()">Отлично!</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.card-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.card-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.card-breadcrumb a:hover {
+    color: #cc0000;
+}
+.card-container {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    gap: 50px;
+    margin-bottom: 50px;
+}
+.card-form-section {
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+}
+.card-form-section h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.card-subtitle {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+}
+.card-form .form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+.card-form .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.85rem;
+}
+.card-form .form-group input, .card-form .form-group select {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 1rem;
+}
+.card-form .form-group input:focus, .card-form .form-group select:focus {
+    outline: none;
+    border-color: #cc0000;
+}
+.card-icon {
+    position: absolute;
+    right: 15px;
+    bottom: 14px;
+    color: #999;
+    font-size: 1.2rem;
+}
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.cvv-tooltip {
+    position: absolute;
+    right: 15px;
+    bottom: 14px;
+    cursor: pointer;
+}
+.cvv-tooltip i {
+    color: #999;
+    font-size: 1rem;
+}
+.cvv-tooltip span {
+    position: absolute;
+    right: 0;
+    top: -40px;
+    background: #1a1a1a;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+.cvv-tooltip:hover span {
+    opacity: 1;
+    visibility: visible;
+}
+.card-submit-btn {
+    width: 100%;
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.card-submit-btn:hover {
+    background: #ff1a1a;
+}
+.card-security {
+    margin-top: 25px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.card-security i {
+    font-size: 1.2rem;
+    color: #28a745;
+}
+.card-security span {
+    font-size: 0.75rem;
+    color: #666;
+}
+.card-benefits {
+    background: #f9f9f9;
+    padding: 35px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    height: fit-content;
+}
+.card-benefits h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+.card-benefits ul {
+    list-style: none;
+    margin-bottom: 25px;
+}
+.card-benefits li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #555;
+    font-size: 0.9rem;
+}
+.card-benefits li i {
+    color: #cc0000;
+}
+.card-icons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+.card-icons i {
+    font-size: 2.5rem;
+    color: #888;
+}
+.card-footer-settings {
+    margin-top: 40px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+.card-footer-settings p {
+    color: #999;
+    font-size: 0.75rem;
+    margin: 5px 0;
+}
+.card-footer-settings p:first-child {
+    color: #cc0000;
+}
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.custom-modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s;
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.custom-modal-header {
+    padding: 20px;
+    text-align: center;
+}
+.custom-modal-header.success {
+    background: #4caf50;
+    color: white;
+}
+.custom-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+.custom-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+.custom-modal-body {
+    padding: 25px;
+    text-align: center;
+}
+.custom-modal-body p {
+    font-size: 1rem;
+    color: #333;
+}
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+    display: flex;
+    justify-content: center;
+}
+.modal-confirm {
+    padding: 10px 35px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: #4caf50;
+    color: white;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+}
+.modal-confirm:hover {
+    background: #45a049;
+}
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: 1fr;
+    }
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
+    window.location.href = "{{ url_for('cards_list') }}";
+}
+
+document.getElementById('cardForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvv = document.getElementById('cardCvv').value;
+    const cardName = document.getElementById('cardName').value;
+    const cardType = document.getElementById('cardType').value;
+    
+    if (cardNumber.length !== 16) {
+        alert('Введите корректный номер карты (16 цифр)');
+        return;
+    }
+    if (!cardExpiry.match(/^(0[1-9]|1[0-2])\/\d{2}$/)) {
+        alert('Введите корректный срок действия (ММ/ГГ)');
+        return;
+    }
+    if (cardCvv.length !== 3) {
+        alert('Введите корректный CVV код (3 цифры)');
+        return;
+    }
+    if (cardName.trim().length < 3) {
+        alert('Введите имя держателя карты');
+        return;
+    }
+    
+    // Сохраняем карту в localStorage
+    const cards = JSON.parse(localStorage.getItem('userCards') || '[]');
+    cards.push({
+        number: cardNumber,
+        expiry: cardExpiry,
+        cvv: cardCvv,
+        holder: cardName.toUpperCase(),
+        type: cardType
+    });
+    localStorage.setItem('userCards', JSON.stringify(cards));
+    
+    document.getElementById('successModal').style.display = 'flex';
+    this.reset();
+});
+
+// Маски ввода
+document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length > 16) value = value.slice(0, 16);
+    let formatted = '';
+    for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += ' ';
+        formatted += value[i];
+    }
+    this.value = formatted;
+});
+
+document.getElementById('cardExpiry')?.addEventListener('input', function(e) {
+    let value = this.value.replace(/\D/g, '');
+    if (value.length > 4) value = value.slice(0, 4);
+    if (value.length > 2) {
+        this.value = value.slice(0, 2) + '/' + value.slice(2);
+    } else {
+        this.value = value;
+    }
+});
+
+document.getElementById('cardCvv')?.addEventListener('input', function(e) {
+    this.value = this.value.replace(/\D/g, '').slice(0, 3);
+});
+</script>
+{% endblock %}

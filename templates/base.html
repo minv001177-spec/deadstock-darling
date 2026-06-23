@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadstock Darling - {% block title %}Винтажный магазин{% endblock %}</title>
+    
+    <!-- ========== ИКОНКА ВО ВКЛАДКЕ ========== -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Arsenal+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="light-theme">
+    <!-- Верхняя черная полоска с акцией -->
+    <div class="top-promo-bar">
+        <div class="container">
+            <div class="promo-text">
+                <span class="promo-message">Новая коллекция винтажного стиля с этого месяца! Скидка 67%</span>
+                <a href="{{ url_for('new_collection') }}" class="promo-buy-btn">КУПИТЕ СЕЙЧАС</a>
+                <div class="header-actions">
+                    <button class="theme-toggle-btn" id="themeToggleBtn">
+                        <i class="fas fa-sun"></i>
+                        <span class="theme-text">Светлая</span>
+                    </button>
+                    <span class="language-select">Русский</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Остальной хедер -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='images/logo.jpg') }}" 
+                         alt="Deadstock Darling Logo"
+                         class="logo-image"
+                         onerror="this.onerror=null; this.src='https://placehold.co/50x50/cc0000/white?text=DD'">
+                    <h1>DEADSTOCK DARLING</h1>
+                </div>
+                <div class="header-right">
+                    <div class="header-links">
+                        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a>
+                        <a href="{{ url_for('contacts') }}">ПОМОЩЬ</a>
+                        <a href="{{ url_for('about') }}">О НАС</a>
+                        
+                        {% if current_user.is_authenticated %}
+                            <span class="user-name">{{ current_user.username }}</span>
+                            <a href="{{ url_for('logout') }}" class="logout-link">ВЫЙТИ</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}">ВОЙТИ</a>
+                            <a href="{{ url_for('register') }}">РЕГИСТРАЦИЯ</a>
+                        {% endif %}
+                        
+                        <div class="search-bar">
+                            <input type="text" id="searchInput" placeholder="НАЙТИ ПО ЗАПРОСУ...">
+                            <button id="searchBtn"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="header-icons">
+                        <a href="{{ url_for('wishlist') }}" class="icon-link">
+                            <i class="far fa-heart"></i>
+                            <span class="icon-tooltip">Избранное</span>
+                        </a>
+                        <a href="{{ url_for('cart') }}" class="icon-link cart-icon-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="cart-count" id="cartCount">0</span>
+                            <span class="icon-tooltip">Корзина</span>
+                        </a>
+                        <div class="profile-dropdown">
+                            <button class="profile-btn" id="profileBtn">
+                                <i class="far fa-user"></i>
+                                <span class="icon-tooltip">Профиль</span>
+                            </button>
+                            <div class="dropdown-menu" id="dropdownMenu">
+                                <a href="{{ url_for('profile') }}" class="dropdown-item">
+                                    <i class="fas fa-user-cog"></i> НАСТРОИТЬ ПРОФИЛЬ
+                                </a>
+                                <a href="{{ url_for('cart') }}" class="dropdown-item">
+                                    <i class="fas fa-shopping-cart"></i> КОРЗИНА
+                                </a>
+                                <a href="{{ url_for('cards_list') }}" class="dropdown-item">
+                                    <i class="fas fa-credit-card"></i> КАРТА
+                                </a>
+                                <a href="{{ url_for('privacy') }}" class="dropdown-item">
+                                    <i class="fas fa-lock"></i> ПРИВАТНОСТЬ
+                                </a>
+                                <a href="{{ url_for('wishlist') }}" class="dropdown-item">
+                                    <i class="fas fa-heart"></i> ОТЛОЖЕННОЕ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="{{ url_for('logout') }}" class="dropdown-item logout-item">
+                                    <i class="fas fa-sign-out-alt"></i> ВЫЙТИ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h3>Deadstock Darling</h3>
+                    <p>exclusive@gmail.com</p>
+                    <p>+676-4242-5252</p>
+                </div>
+                <div class="footer-links">
+                    <a href="{{ url_for('about') }}">О нас</a>
+                    <a href="#">Доставка</a>
+                    <a href="#">Возврат</a>
+                    <a href="{{ url_for('contacts') }}">Контакты</a>
+                </div>
+                <div class="footer-social">
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-vk"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Deadstock Darling. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Кнопка "Наверх" -->
+    <button id="scrollToTopBtn" class="scroll-to-top-btn" title="Наверх">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <style>
+        /* ========== ЛОГОТИП В ШАПКЕ ========== */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            color: #1a1a1a;
+            margin: 0;
+        }
+        
+        /* Темная тема */
+        body.dark-theme .logo h1 {
+            color: #e0e0e0;
+        }
+        
+        body.dark-theme .logo-image {
+            filter: brightness(0.9);
+        }
+        
+        /* ========== КНОПКА "НАВЕРХ" ========== */
+        .scroll-to-top-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: #cc0000;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .scroll-to-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top-btn:hover {
+            background: #ff1a1a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4);
+        }
+
+        .scroll-to-top-btn:active {
+            transform: translateY(0);
+        }
+
+        body.dark-theme .scroll-to-top-btn {
+            background: #cc0000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-theme .scroll-to-top-btn:hover {
+            background: #ff1a1a;
+        }
+
+        @media (max-width: 768px) {
+            .scroll-to-top-btn {
+                bottom: 20px;
+                left: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+            
+            .logo-image {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .logo h1 {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+            
+            .logo {
+                gap: 8px;
+            }
+        }
+    </style>
+
+    <script>
+        // ========== КНОПКА "НАВЕРХ" ==========
+        (function() {
+            const scrollBtn = document.getElementById('scrollToTopBtn');
+            if (!scrollBtn) return;
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    scrollBtn.classList.add('show');
+                } else {
+                    scrollBtn.classList.remove('show');
+                }
+            });
+            
+            scrollBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

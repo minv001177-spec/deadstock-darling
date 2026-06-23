@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+<div class="cart-wrapper">
+    <div class="cart-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">КОРЗИНА</a>
+    </div>
+    
+    <h1 class="cart-title">КОРЗИНА</h1>
+    
+    <div id="cartContent">
+        <!-- Содержимое корзины будет загружено через AJAX -->
+        <div class="cart-loading" style="text-align: center; padding: 50px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #cc0000;"></i>
+            <p>Загрузка корзины...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteItemModal" class="custom-modal">
+    <div class="custom-modal-overlay"></div>
+    <div class="custom-modal-content">
+        <div class="custom-modal-header warning">
+            <i class="fas fa-trash-alt"></i>
+            <h3>УДАЛЕНИЕ ТОВАРА</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p id="deleteItemName">Вы уверены, что хотите удалить этот товар из корзины?</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-cancel" id="cancelDeleteBtn">НЕТ</button>
+            <button class="modal-confirm" id="confirmDeleteBtn">ДА, УДАЛИТЬ</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.cart-header {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr 1fr 0.8fr 0.8fr 0.8fr 0.5fr;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    border: 1px solid #eee;
+    align-items: center;
+}
+.cart-item {
+    display: grid;
+    grid-template-columns: 0.5fr 1.5fr 1fr 0.8fr 0.8fr 0.8fr 0.5fr;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+    transition: all 0.3s;
+}
+.cart-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.cart-item-checkbox {
+    text-align: center;
+}
+.item-checkbox, .select-all-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #cc0000;
+}
+.cart-item-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.mini-placeholder {
+    width: 60px;
+    height: 60px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mini-placeholder i {
+    font-size: 1.5rem;
+    color: #cc0000;
+}
+.cart-item-details h3 {
+    font-size: 0.9rem;
+    margin: 0;
+}
+.cart-item-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.option-badge {
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+}
+.option-badge:first-child {
+    background: #fff0f0;
+    color: #cc0000;
+}
+.option-badge:last-child {
+    background: #f0f0ff;
+    color: #3366cc;
+}
+.cart-item-price, .cart-item-total {
+    font-weight: bold;
+    color: #cc0000;
+}
+.cart-quantity {
+    width: 60px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: center;
+}
+.cart-quantity:focus {
+    outline: none;
+    border-color: #cc0000;
+}
+.btn-remove {
+    background: none;
+    border: none;
+    color: #cc0000;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+.btn-remove:hover {
+    color: #ff1a1a;
+}
+.cart-summary {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    height: fit-content;
+}
+.total-price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #cc0000;
+    margin: 20px 0;
+}
+.delivery-info {
+    margin-top: 15px;
+    font-size: 0.7rem;
+    color: #999;
+    text-align: center;
+}
+.btn-primary {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+}
+.btn-primary:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.btn-block {
+    width: 100%;
+    display: block;
+    text-align: center;
+}
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+.empty-cart {
+    text-align: center;
+    padding: 80px 20px;
+}
+.empty-cart i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+.empty-cart p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+.custom-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    z-index: 2001;
+    animation: modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+.custom-modal-header {
+    padding: 20px;
+    text-align: center;
+}
+.custom-modal-header.warning {
+    background: #cc0000;
+    color: white;
+}
+.custom-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+.custom-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+.custom-modal-body {
+    padding: 25px;
+    text-align: center;
+}
+.custom-modal-body p {
+    font-size: 1rem;
+    color: #333;
+}
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.modal-cancel, .modal-confirm {
+    padding: 10px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.modal-cancel {
+    background: #eee;
+    color: #666;
+}
+.modal-cancel:hover {
+    background: #ddd;
+    transform: translateY(-2px);
+}
+.modal-confirm {
+    background: #cc0000;
+    color: white;
+}
+.modal-confirm:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.cart-loading {
+    text-align: center;
+    padding: 50px;
+}
+.cart-loading i {
+    font-size: 3rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.cart-loading p {
+    color: #666;
+}
+body.dark-theme .cart-header {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #444;
+}
+body.dark-theme .cart-item {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .cart-item-details h3 {
+    color: #e0e0e0;
+}
+body.dark-theme .cart-item-options .option-badge {
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+body.dark-theme .cart-item-options .option-badge:first-child {
+    background: #3a2a2a;
+    border-color: #ff6666;
+    color: #ff9999;
+}
+body.dark-theme .cart-item-options .option-badge:last-child {
+    background: #2a2a3a;
+    border-color: #6699ff;
+    color: #9999ff;
+}
+body.dark-theme .cart-item-price,
+body.dark-theme .cart-item-total {
+    color: #ff6666;
+}
+body.dark-theme .cart-quantity {
+    background: #3a3a3a;
+    border-color: #555;
+    color: #e0e0e0;
+}
+body.dark-theme .cart-summary {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .cart-summary h3 {
+    color: #e0e0e0;
+    border-bottom-color: #555;
+}
+body.dark-theme .total-price {
+    color: #ff6666;
+}
+body.dark-theme .delivery-info {
+    color: #888;
+}
+body.dark-theme .empty-cart {
+    background: #2a2a2a;
+}
+body.dark-theme .empty-cart p {
+    color: #aaa;
+}
+body.dark-theme .empty-cart i {
+    color: #555;
+}
+body.dark-theme .cart-loading p {
+    color: #aaa;
+}
+@media (max-width: 768px) {
+    .cart-header {
+        display: none;
+    }
+    .cart-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+    }
+    .cart-item-info {
+        justify-content: center;
+    }
+    .cart-item-checkbox {
+        text-align: center;
+    }
+    .cart-item-options {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+let cartItemToDelete = null;
+
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+function openDeleteModal(cartId, productName) {
+    cartItemToDelete = cartId;
+    const deleteItemName = document.getElementById('deleteItemName');
+    if (deleteItemName) {
+        deleteItemName.innerHTML = `Вы уверены, что хотите удалить "${productName}" из корзины?`;
+    }
+    const modal = document.getElementById('deleteItemModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteItemModal');
+    if (modal) modal.style.display = 'none';
+    cartItemToDelete = null;
+}
+
+// Функция загрузки корзины через AJAX
+function loadCart() {
+    fetch('/cart-data')
+        .then(response => response.json())
+        .then(data => {
+            renderCart(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('cartContent').innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Ошибка загрузки корзины</p>
+                    <button onclick="loadCart()" class="btn-primary">ПОВТОРИТЬ</button>
+                </div>
+            `;
+        });
+}
+
+// Функция отображения корзины
+function renderCart(data) {
+    const cartContent = document.getElementById('cartContent');
+    
+    if (!data.items || data.items.length === 0) {
+        cartContent.innerHTML = `
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <p>ВАША КОРЗИНА ПУСТА</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">ПРОДОЛЖИТЬ ПОКУПКИ</a>
+            </div>
+        `;
+        return;
+    }
+    
+    let itemsHtml = `
+        <div class="cart-container">
+            <div class="cart-items">
+                <div class="cart-header">
+                    <div><input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox"> ВСЕ</div>
+                    <div>ТОВАР</div>
+                    <div>ЦВЕТ/РАЗМЕР</div>
+                    <div>ЦЕНА</div>
+                    <div>КОЛИЧЕСТВО</div>
+                    <div>СУММА</div>
+                    <div></div>
+                </div>
+    `;
+    
+    for (const item of data.items) {
+        itemsHtml += `
+            <div class="cart-item" data-cart-id="${item.id}">
+                <div class="cart-item-checkbox">
+                    <input type="checkbox" class="item-checkbox" data-cart-item-id="${item.id}" data-product-id="${item.product_id}" data-price="${item.price}" data-quantity="${item.quantity}">
+                </div>
+                <div class="cart-item-info">
+                    <div class="mini-placeholder">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div class="cart-item-details">
+                        <h3>${escapeHtml(item.name)}</h3>
+                    </div>
+                </div>
+                <div class="cart-item-options">
+                    <span class="option-badge">🎨 ${escapeHtml(item.color)}</span>
+                    <span class="option-badge">📏 ${escapeHtml(item.size)}</span>
+                </div>
+                <div class="cart-item-price">${item.price}₽</div>
+                <div class="cart-item-quantity">
+                    <input type="number" value="${item.quantity}" min="1" class="cart-quantity" data-cart-id="${item.id}">
+                </div>
+                <div class="cart-item-total">${item.total}₽</div>
+                <div class="cart-item-remove">
+                    <button class="btn-remove" data-cart-id="${item.id}" data-product-name="${escapeHtml(item.name)}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    itemsHtml += `
+            </div>
+            <div class="cart-summary">
+                <h3>ИТОГО</h3>
+                <div class="total-price" id="selectedTotal">0₽</div>
+                <button id="checkoutSelectedBtn" class="btn-primary btn-block" disabled>ОФОРМИТЬ ВЫБРАННОЕ</button>
+                <p class="delivery-info">Бесплатная доставка от 1500₽</p>
+            </div>
+        </div>
+    `;
+    
+    cartContent.innerHTML = itemsHtml;
+    
+    // Обновляем счетчик в шапке
+    const cartCount = document.getElementById('cartCount');
+    if (cartCount) cartCount.textContent = data.cart_count;
+    
+    // Навешиваем обработчики после рендера
+    attachEventHandlers();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function attachEventHandlers() {
+    // Кнопки удаления
+    document.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const cartId = this.dataset.cartId;
+            const productName = this.dataset.productName || 'товар';
+            openDeleteModal(cartId, productName);
+        });
+    });
+    
+    // Обновление количества
+    document.querySelectorAll('.cart-quantity').forEach(input => {
+        input.addEventListener('change', function() {
+            let quantity = parseInt(this.value);
+            if (quantity < 1) {
+                this.value = 1;
+                quantity = 1;
+            }
+            const itemId = this.dataset.cartId;
+            
+            fetch('/update_cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: itemId, quantity: quantity })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCart(); // Перезагружаем корзину
+                } else {
+                    showNotification('Ошибка обновления количества', 'error');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    
+    // Чекбоксы
+    const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+    itemCheckboxes.forEach(cb => cb.addEventListener('change', updateSelectedTotal));
+    
+    // Выделить все
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            document.querySelectorAll('.item-checkbox').forEach(cb => cb.checked = this.checked);
+            updateSelectedTotal();
+        });
+    }
+    
+    // Кнопка оформления
+    const checkoutSelectedBtn = document.getElementById('checkoutSelectedBtn');
+    if (checkoutSelectedBtn) {
+        checkoutSelectedBtn.addEventListener('click', function() {
+            const selectedItems = [];
+            document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+                selectedItems.push({
+                    cart_item_id: parseInt(cb.dataset.cartItemId),
+                    product_id: parseInt(cb.dataset.productId),
+                    quantity: parseInt(cb.dataset.quantity)
+                });
+            });
+            
+            if (selectedItems.length === 0) {
+                showNotification('Выберите товары для оформления', 'error');
+                return;
+            }
+            
+            const ids = selectedItems.map(i => i.cart_item_id).join(',');
+            const quantities = selectedItems.map(i => i.quantity).join(',');
+            window.location.href = `/checkout?ids=${ids}&quantities=${quantities}`;
+        });
+    }
+    
+    updateSelectedTotal();
+}
+
+function updateSelectedTotal() {
+    let total = 0;
+    const checkedBoxes = document.querySelectorAll('.item-checkbox:checked');
+    checkedBoxes.forEach(cb => {
+        total += parseFloat(cb.dataset.price) * parseInt(cb.dataset.quantity);
+    });
+    
+    const selectedTotalSpan = document.getElementById('selectedTotal');
+    if (selectedTotalSpan) selectedTotalSpan.innerHTML = total + '₽';
+    
+    const checkoutBtn = document.getElementById('checkoutSelectedBtn');
+    if (checkoutBtn) checkoutBtn.disabled = checkedBoxes.length === 0;
+}
+
+// Подтверждение удаления
+document.getElementById('confirmDeleteBtn')?.addEventListener('click', function() {
+    if (cartItemToDelete) {
+        fetch(`/remove_from_cart/${cartItemToDelete}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Товар удален из корзины', 'success');
+                loadCart(); // Перезагружаем корзину
+            } else {
+                showNotification(data.error || 'Ошибка при удалении', 'error');
+            }
+            closeDeleteModal();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при удалении товара', 'error');
+            closeDeleteModal();
+        });
+    } else {
+        closeDeleteModal();
+    }
+});
+
+// Отмена удаления
+document.getElementById('cancelDeleteBtn')?.addEventListener('click', closeDeleteModal);
+
+// Закрытие модального окна
+const modalOverlay = document.querySelector('.custom-modal-overlay');
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', closeDeleteModal);
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+});
+
+// Загружаем корзину при загрузке страницы
+loadCart();
+
+// Стили для уведомлений
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    .custom-notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 2000;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        min-width: 280px;
+        max-width: 380px;
+        overflow: hidden;
+    }
+    body.dark-theme .custom-notification {
+        background: #2a2a2a;
+    }
+    .custom-notification.show {
+        transform: translateX(0);
+    }
+    .custom-notification.success {
+        border-left: 4px solid #4caf50;
+    }
+    .custom-notification.error {
+        border-left: 4px solid #ff4444;
+    }
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+    .custom-notification.success .notification-content i {
+        color: #4caf50;
+        font-size: 1.2rem;
+    }
+    .custom-notification.error .notification-content i {
+        color: #ff4444;
+        font-size: 1.2rem;
+    }
+    .notification-content span {
+        font-size: 0.85rem;
+        color: #ffffff;
+    }
+    @media (max-width: 480px) {
+        .custom-notification {
+            left: 20px;
+            right: 20px;
+            min-width: auto;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(notificationStyles);
+</script>
+{% endblock %}

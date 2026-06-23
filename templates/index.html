@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+
+<!-- Верхняя часть: категории слева, картинка справа -->
+<div class="hero-section">
+    <div class="categories-sidebar">
+        <a href="{{ url_for('new_collection') }}" class="cat-link">Новая коллекция <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='accessories') }}" class="cat-link">Аксессуары для всех <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='clothing') }}" class="cat-link">Штаны и юбки <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='shoes') }}" class="cat-link">Обувь <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='clothing') }}" class="cat-link">Куртки <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='accessories') }}" class="cat-link">Головные уборы <span class="arrow">›</span></a>
+        <a href="{{ url_for('category', category_name='bags') }}" class="cat-link">Сумки и рюкзаки <span class="arrow">›</span></a>
+    </div>
+    <div class="hero-big-image">
+        <img src="{{ url_for('static', filename='images/hero-banner.jpg') }}" 
+             alt="Deadstock Darling"
+             class="hero-image"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="big-placeholder" style="display: none;">
+            <i class="fas fa-tshirt"></i>
+            <span>DEADSTOCK DARLING</span>
+        </div>
+    </div>
+</div>
+
+<!-- Приветствие для авторизованного пользователя -->
+{% if current_user.is_authenticated %}
+<div class="welcome-message">
+    <p>Добро пожаловать, <span class="username">{{ current_user.username }}</span>!</p>
+</div>
+{% endif %}
+
+<!-- Новинки, Сгорающие скидки - слева -->
+<div class="promo-left-block">
+    <div class="promo-text-left">
+        <h2>НОВИНКИ! <span class="emoji">(P≥W≤Q)</span></h2>
+        <h2 class="sale-red">СГОРАЮЩИЕ СКИДКИ</h2>
+    </div>
+</div>
+
+<!-- Таймер по центру -->
+<div class="timer-center" id="mainTimer">
+    <div class="timer-item">
+        <span class="timer-num" id="days">02</span>
+        <span class="timer-label">DAYS</span>
+    </div>
+    <div class="timer-item">
+        <span class="timer-num" id="hours">23</span>
+        <span class="timer-label">HOURS</span>
+    </div>
+    <div class="timer-item">
+        <span class="timer-num" id="minutes">59</span>
+        <span class="timer-label">MINUTES</span>
+    </div>
+    <div class="timer-item">
+        <span class="timer-num" id="seconds">32</span>
+        <span class="timer-label">SECONDS</span>
+    </div>
+</div>
+
+<!-- 4 товара под таймером (новинки) -->
+<div class="products-row">
+    {% for product in new_products[:4] %}
+    <div class="product-item" onclick="location.href='{{ url_for('product_detail', id=product.id) }}'">
+        <div class="product-square">
+            {% if product.image_url %}
+            <img src="{{ url_for('static', filename='images/' + product.image_url) }}" 
+                 alt="{{ product.name }}"
+                 class="product-image"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>'">
+            {% else %}
+            <i class="fas fa-tshirt"></i>
+            {% endif %}
+        </div>
+        <h4>{{ product.name }}</h4>
+        <div class="price">
+            {% if product.old_price %}
+            <span class="old">{{ product.old_price }}₽</span>
+            {% endif %}
+            <span class="new">{{ product.price }}₽</span>
+        </div>
+        <div class="stars">★★★★★ ({{ product.reviews }})</div>
+        <button class="cart-btn add-to-cart-btn" data-id="{{ product.id }}" onclick="event.stopPropagation()">В КОРЗИНУ</button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Большая кнопка ПОСМОТРЕТЬ ЕЩЕ -->
+<div class="full-width-btn">
+    <a href="{{ url_for('new_collection') }}" class="big-btn">ПОСМОТРЕТЬ ЕЩЕ</a>
+</div>
+
+<!-- Большая фотка 1 - Винтажная коллекция -->
+<div class="big-banner vintage-banner">
+    <img src="{{ url_for('static', filename='images/vintage-collection.jpg') }}" 
+         alt="Винтажная коллекция" 
+         class="banner-image">
+    <div class="banner-text-overlay">
+        <div class="banner-text-content">
+            <h2 class="banner-title">DEADSTOCK DARLING</h2>
+            <p class="banner-subtitle">ВИНТАЖ И СКИДКИ</p>
+            <a href="{{ url_for('new_collection') }}" class="banner-btn">КУПИТЕ СЕЙЧАС</a>
+        </div>
+    </div>
+</div>
+
+<!-- ЧАЩЕ ВСЕГО ПОКУПАЮТ -->
+<div class="promo-left-block">
+    <div class="promo-text-left">
+        <h2>В ЭТОМ МЕСЯЦЕ <span class="emoji">(*^‿^*)</span></h2>
+        <h2 class="sale-red">ЧАЩЕ ВСЕГО ПОКУПАЮТ...</h2>
+    </div>
+</div>
+
+<div class="products-row">
+    {% for product in sale_products[:4] %}
+    <div class="product-item" onclick="location.href='{{ url_for('product_detail', id=product.id) }}'">
+        <div class="product-square">
+            {% if product.image_url %}
+            <img src="{{ url_for('static', filename='images/' + product.image_url) }}" 
+                 alt="{{ product.name }}"
+                 class="product-image"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-tag\'></i>'">
+            {% else %}
+            <i class="fas fa-tag"></i>
+            {% endif %}
+        </div>
+        <h4>{{ product.name }}</h4>
+        <div class="price">
+            <span class="old">{{ product.old_price }}₽</span>
+            <span class="new">{{ product.price }}₽</span>
+        </div>
+        <div class="stars">★★★★★ ({{ product.reviews }})</div>
+        <button class="cart-btn add-to-cart-btn" data-id="{{ product.id }}" onclick="event.stopPropagation()">В КОРЗИНУ</button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Большая фотка 2 - Y2K коллекция -->
+<div class="big-banner y2k-banner">
+    <img src="{{ url_for('static', filename='images/y2k-collection.jpg') }}" 
+         alt="Y2K КОЛЛЕКЦИЯ" 
+         class="banner-image">
+    <div class="banner-text-overlay">
+        <div class="banner-text-content">
+            <h2 class="banner-title">Y2K КОЛЛЕКЦИЯ</h2>
+            <p class="banner-subtitle">ВИНТАЖ ВОЗВРАЩАЕТСЯ</p>
+            <a href="{{ url_for('new_collection') }}" class="banner-btn">СМОТРЕТЬ ВСЕ</a>
+        </div>
+    </div>
+</div>
+
+<!-- НЕДАВНИЕ ТОП ТОВАРЫ -->
+<div class="promo-left-block">
+    <div class="promo-text-left">
+        <h2>НЕДАВНИЕ ТОП ТОВАРЫ</h2>
+    </div>
+</div>
+
+<div class="products-grid-8">
+    {% for product in all_products[:8] %}
+    <div class="product-item" onclick="location.href='{{ url_for('product_detail', id=product.id) }}'">
+        <div class="product-square">
+            {% if product.image_url %}
+            <img src="{{ url_for('static', filename='images/' + product.image_url) }}" 
+                 alt="{{ product.name }}"
+                 class="product-image"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>'">
+            {% else %}
+            <i class="fas fa-tshirt"></i>
+            {% endif %}
+        </div>
+        <h4>{{ product.name }}</h4>
+        <div class="price">{{ product.price }}₽</div>
+        <div class="stars">★★★★★ ({{ product.reviews }})</div>
+        <button class="cart-btn add-to-cart-btn" data-id="{{ product.id }}" onclick="event.stopPropagation()">В КОРЗИНУ</button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="full-width-btn">
+    <a href="{{ url_for('new_collection') }}" class="big-btn">УВИДЕТЬ БОЛЬШЕ</a>
+</div>
+
+<!-- НОВАЯ ПОСТАВКА -->
+<div class="new-supply-section">
+    <div class="promo-left-block">
+        <div class="promo-text-left">
+            <h2>НОВАЯ ПОСТАВКА!</h2>
+        </div>
+    </div>
+    <div class="supply-grid">
+        <div class="supply-card" onclick="location.href='{{ url_for('new_collection') }}'">
+            <div class="supply-icon"><i class="fas fa-star"></i></div>
+            <h3>НОВАЯ КОЛЛЕКЦИЯ</h3>
+            <p>Посмотрите на новую одежду из новой коллекции</p>
+            <span class="supply-click">ПОСМОТРЕТЬ →</span>
+        </div>
+        <div class="supply-card" onclick="location.href='{{ url_for('category', category_name='shoes') }}'">
+            <div class="supply-icon"><i class="fas fa-shoe-prints"></i></div>
+            <h3>ОБУВЬ</h3>
+            <p>УДОБНАЯ ОБУВЬ, БОЛЬШИЕ СКИДКИ НА ВСЕ!</p>
+            <span class="supply-click">КУПИТЬ СЕЙЧАС →</span>
+        </div>
+        <div class="supply-card" onclick="location.href='{{ url_for('category', category_name='clothing') }}'">
+            <div class="supply-icon"><i class="fas fa-tshirt"></i></div>
+            <h3>ОДЕЖДА</h3>
+            <p>НОВЫЕ ПОСТУПЛЕНИЯ ЕЖЕНЕДЕЛЬНО</p>
+            <span class="supply-click">КУПИТЬ СЕЙЧАС →</span>
+        </div>
+        <div class="supply-card about-card" onclick="location.href='{{ url_for('about') }}'">
+            <div class="supply-icon"><i class="fas fa-users"></i></div>
+            <h3>ИНФОРМАЦИЯ О НАС</h3>
+            <p>АВТОРЫ: ДАНА ДОРИТОС, ТИМУР ТОЧКОВ, ЗАРИНА ЗЕФИРКО, ВИКТОРИЯ ЮНМИНОВНА</p>
+            <p>Мы создаем уникальный винтажный стиль с 2026 года</p>
+            <span class="supply-click">УЗНАТЬ БОЛЬШЕ →</span>
+        </div>
+    </div>
+</div>
+
+<!-- Три преимущества -->
+<div class="advantages-row">
+    <div class="advantage">
+        <div class="icon-circle"><i class="fas fa-truck"></i></div>
+        <h4>БЕСПЛАТНАЯ И БЫСТРАЯ ДОСТАВКА</h4>
+        <p>БЕСПЛАТНАЯ ДОСТАВКА КАЖДОГО ЗАКАЗА!</p>
+    </div>
+    <div class="advantage">
+        <div class="icon-circle"><i class="fas fa-headset"></i></div>
+        <h4>24/7 НА СВЯЗИ С ВАМИ</h4>
+        <p>ДОБРЫЕ СОТРУДНИКИ И МГНОВЕННЫЕ ОТВЕТЫ</p>
+    </div>
+    <div class="advantage">
+        <div class="icon-circle"><i class="fas fa-hand-holding-usd"></i></div>
+        <h4>ВОЗВРАЩЕНИЕ ДЕНЕГ ГАРАНТИРОВАННО</h4>
+        <p>ВОЗВРАЩАЕМ ДЕНЬГИ В ТЕЧЕНИЕ ЧАСА</p>
+    </div>
+</div>
+
+<style>
+.welcome-message {
+    text-align: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #cc0000;
+}
+.welcome-message .username {
+    color: #cc0000;
+    font-weight: bold;
+}
+.products-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin: 40px 0;
+}
+.products-grid-8 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin: 30px 0 50px;
+}
+.product-item {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: white;
+}
+.product-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+.product-square {
+    width: 100%;
+    height: 180px;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.product-square i {
+    font-size: 3rem;
+    color: #cc0000;
+}
+.product-item h4 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    min-height: 45px;
+}
+.price .old {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+.price .new {
+    color: #cc0000;
+    font-weight: bold;
+    font-size: 1rem;
+}
+.stars {
+    color: #ffc107;
+    font-size: 0.7rem;
+    margin: 8px 0;
+}
+.cart-btn {
+    display: inline-block;
+    background: #1a1a1a;
+    color: white;
+    padding: 8px 15px;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+.cart-btn:hover {
+    background: #cc0000;
+}
+.full-width-btn {
+    text-align: center;
+    margin: 30px 0 50px;
+}
+.big-btn {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 12px 50px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+.big-btn:hover {
+    background: #ff1a1a;
+}
+.big-banner {
+    position: relative;
+    margin: 50px 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.banner-image {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+}
+.banner-text-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+    padding: 40px;
+}
+.banner-text-content {
+    text-align: left;
+}
+.banner-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 5px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.banner-subtitle {
+    font-size: 1rem;
+    color: #ffcccc;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.banner-btn {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 10px 25px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+.banner-btn:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.hero-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.big-placeholder {
+    background: #f5f5f5;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+.big-placeholder i {
+    font-size: 4rem;
+    color: #cc0000;
+}
+.hero-section {
+    display: flex;
+    gap: 40px;
+    margin: 40px 0 60px;
+    flex-wrap: wrap;
+}
+.categories-sidebar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.cat-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1a1a1a;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+.cat-link:hover {
+    color: #cc0000;
+    padding-left: 10px;
+}
+.arrow {
+    font-size: 1.3rem;
+    font-weight: normal;
+    color: #cc0000;
+    transition: transform 0.3s ease;
+}
+.cat-link:hover .arrow {
+    transform: translateX(5px);
+}
+.hero-big-image {
+    flex: 2;
+}
+.promo-left-block {
+    margin: 40px 0 20px 0;
+}
+.promo-text-left h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 5px 0;
+    text-align: left;
+}
+.promo-text-left .sale-red {
+    color: #cc0000;
+    text-align: left;
+}
+.emoji {
+    font-size: 1.2rem;
+}
+.timer-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin: 20px 0 50px;
+}
+.timer-item {
+    text-align: center;
+    background: #f5f5f5;
+    padding: 15px 25px;
+    border-radius: 10px;
+    min-width: 90px;
+}
+.timer-num {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #1a1a1a;
+    display: block;
+}
+.timer-label {
+    font-size: 0.7rem;
+    color: #666;
+    letter-spacing: 1px;
+}
+.new-supply-section {
+    margin: 60px 0 40px;
+}
+.supply-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-top: 30px;
+}
+.supply-card {
+    background: #f9f9f9;
+    padding: 25px 15px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.supply-card:hover {
+    transform: translateY(-5px);
+    background: #fff0f0;
+}
+.supply-icon i {
+    font-size: 2rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.supply-card h3 {
+    color: #cc0000;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+.supply-card p {
+    font-size: 0.7rem;
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+.supply-click {
+    color: #cc0000;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.about-card {
+    background: linear-gradient(135deg, #f9f9f9, #fff0f0);
+}
+.advantages-row {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin: 60px 0 50px;
+    text-align: center;
+    flex-wrap: wrap;
+}
+.advantage {
+    flex: 1;
+    min-width: 220px;
+    max-width: 300px;
+}
+.advantage .icon-circle {
+    width: 70px;
+    height: 70px;
+    background: #1a1a1a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    transition: transform 0.3s ease;
+}
+.advantage:hover .icon-circle {
+    transform: scale(1.05);
+}
+.advantage .icon-circle i {
+    font-size: 1.8rem;
+    color: #ffffff;
+}
+.advantage h4 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+.advantage p {
+    font-size: 0.7rem;
+    color: #666;
+    line-height: 1.3;
+}
+@media (max-width: 768px) {
+    .hero-section {
+        flex-direction: column;
+    }
+    .products-row, .products-grid-8, .supply-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .hero-image {
+        height: 250px;
+    }
+    .banner-image {
+        height: 200px;
+    }
+    .banner-title {
+        font-size: 1.2rem;
+    }
+    .banner-subtitle {
+        font-size: 0.8rem;
+    }
+    .banner-text-overlay {
+        padding: 15px;
+    }
+    .banner-btn {
+        padding: 6px 15px;
+        font-size: 0.7rem;
+    }
+    .timer-center {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .timer-item {
+        padding: 10px 15px;
+        min-width: 70px;
+    }
+    .timer-num {
+        font-size: 1.5rem;
+    }
+    .advantages-row {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+@media (max-width: 480px) {
+    .products-row, .products-grid-8, .supply-grid {
+        grid-template-columns: 1fr;
+    }
+}
+body.dark-theme .product-item {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .product-item h4 {
+    color: #e0e0e0;
+}
+body.dark-theme .timer-item {
+    background: #2a2a2a;
+}
+body.dark-theme .timer-num {
+    color: #e0e0e0;
+}
+body.dark-theme .supply-card {
+    background: #2a2a2a;
+}
+body.dark-theme .supply-card p {
+    color: #aaa;
+}
+body.dark-theme .advantage h4 {
+    color: #e0e0e0;
+}
+body.dark-theme .advantage p {
+    color: #aaa;
+}
+body.dark-theme .banner-title {
+    color: #ffffff;
+}
+body.dark-theme .banner-subtitle {
+    color: #ffcccc;
+}
+body.dark-theme .cat-link {
+    color: #e0e0e0;
+    border-bottom-color: #444;
+}
+body.dark-theme .cat-link:hover {
+    color: #ff6666;
+}
+</style>
+
+<script>
+// Таймер
+function startTimer() {
+    let target = new Date();
+    target.setDate(target.getDate() + 3);
+    
+    setInterval(() => {
+        let now = new Date();
+        let diff = target - now;
+        if (diff <= 0) return;
+        
+        let days = Math.floor(diff / 86400000);
+        let hours = Math.floor((diff % 86400000) / 3600000);
+        let minutes = Math.floor((diff % 3600000) / 60000);
+        let seconds = Math.floor((diff % 60000) / 1000);
+        
+        let d = document.getElementById('days');
+        let h = document.getElementById('hours');
+        let m = document.getElementById('minutes');
+        let s = document.getElementById('seconds');
+        if (d) d.textContent = days.toString().padStart(2, '0');
+        if (h) h.textContent = hours.toString().padStart(2, '0');
+        if (m) m.textContent = minutes.toString().padStart(2, '0');
+        if (s) s.textContent = seconds.toString().padStart(2, '0');
+    }, 1000);
+}
+startTimer();
+
+// Уведомления
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+// Добавление в корзину
+document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+    btn.removeEventListener('click', window.addToCartHandler);
+    
+    window.addToCartHandler = function(e) {
+        e.stopPropagation();
+        const productId = this.dataset.id;
+        
+        if (!productId) {
+            console.error('No product ID');
+            showNotification('Ошибка: ID товара не найден', 'error');
+            return;
+        }
+        
+        fetch(`/add_to_cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ color: 'Черный', size: 'M' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Товар добавлен в корзину', 'success');
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) cartCount.textContent = data.cart_count;
+            } else {
+                showNotification('Ошибка при добавлении товара', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при добавлении товара', 'error');
+        });
+    };
+    
+    btn.addEventListener('click', window.addToCartHandler);
+});
+
+// Обновление счетчика корзины
+function updateCartCount() {
+    fetch('/api/cart/count')
+        .then(response => response.json())
+        .then(data => {
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) cartCount.textContent = data.count;
+        })
+        .catch(error => console.error('Error:', error));
+}
+updateCartCount();
+</script>
+
+{% endblock %}

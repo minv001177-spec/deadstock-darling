@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-left">
+        <img src="{{ url_for('static', filename='images/banners/login-banner.jpg') }}" 
+             alt="Deadstock Darling"
+             class="register-full-image">
+    </div>
+    <div class="register-right">
+        <div class="register-card">
+            <h2>СОЗДАЙТЕ НОВЫЙ АККАУНТ!</h2>
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Имя" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Почта или номер телефона" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" id="password" placeholder="Пароль" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirm_password" id="confirmPassword" placeholder="Подтвердите пароль" required>
+                </div>
+                <button type="submit" class="register-btn">СОЗДАТЬ АККАУНТ</button>
+            </form>
+            <div class="register-divider">
+                <span>Войти через почту</span>
+            </div>
+            <div class="google-login">
+                <a href="#" class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon">
+                    <span>Войти через Google</span>
+                </a>
+            </div>
+            <p class="register-login-link">
+                УЖЕ ЕСТЬ АККАУНТ? <a href="{{ url_for('login') }}">ВОЙТИ</a>
+            </p>
+            <div class="register-footer">
+                <p>Другие настройки</p>
+                <p class="contacts-footer">exclusive@gmail.com</p>
+                <p class="contacts-footer">+676-4242-5252</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Кастомное модальное окно -->
+<div id="customModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>Уведомление</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p id="modalMessage"></p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-close-btn">Закрыть</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.register-container {
+    display: flex;
+    min-height: calc(100vh - 200px);
+    margin: 30px 0;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.register-left {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 550px;
+    background: #1a1a1a;
+}
+
+.register-full-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.register-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: #ffffff;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 450px;
+}
+
+.register-card h2 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+    color: #1a1a1a;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background: #ffffff;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #cc0000;
+    box-shadow: 0 0 0 2px rgba(204,0,0,0.1);
+}
+
+.register-btn {
+    width: 100%;
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 10px;
+}
+
+.register-btn:hover {
+    background: #ff1a1a;
+}
+
+.register-divider {
+    text-align: center;
+    margin: 25px 0 20px;
+    position: relative;
+}
+
+.register-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e0e0e0;
+}
+
+.register-divider span {
+    background: #ffffff;
+    padding: 0 15px;
+    position: relative;
+    color: #999;
+    font-size: 0.85rem;
+}
+
+.google-login {
+    margin-bottom: 25px;
+}
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+.google-btn:hover {
+    border-color: #cc0000;
+    background: #fafafa;
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.google-btn span {
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.register-login-link {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 0.9rem;
+}
+
+.register-login-link a {
+    color: #cc0000;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.register-footer {
+    margin-top: 40px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.register-footer p {
+    color: #999;
+    font-size: 0.75rem;
+    margin: 5px 0;
+}
+
+.contacts-footer {
+    color: #cc0000 !important;
+}
+
+/* Модальное окно */
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 380px;
+    text-align: center;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.custom-modal-header {
+    background: #cc0000;
+    padding: 20px;
+    color: white;
+}
+
+.custom-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.custom-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.custom-modal-body {
+    padding: 25px 20px;
+}
+
+.custom-modal-body p {
+    font-size: 1rem;
+    color: #333;
+}
+
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+}
+
+.modal-close-btn {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.modal-close-btn:hover {
+    background: #ff1a1a;
+}
+
+/* Темная тема */
+body.dark-theme .register-container {
+    background: #1a1a1a;
+}
+
+body.dark-theme .register-right {
+    background: #1a1a1a;
+}
+
+body.dark-theme .register-card h2 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-group input {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+body.dark-theme .form-group input:focus {
+    border-color: #ff6666;
+}
+
+body.dark-theme .register-divider::before {
+    background: #444;
+}
+
+body.dark-theme .register-divider span {
+    background: #1a1a1a;
+    color: #aaa;
+}
+
+body.dark-theme .google-btn {
+    background: #2a2a2a;
+    border-color: #444;
+}
+
+body.dark-theme .google-btn span {
+    color: #e0e0e0;
+}
+
+body.dark-theme .google-btn:hover {
+    border-color: #ff6666;
+}
+
+body.dark-theme .register-footer {
+    border-top-color: #444;
+}
+
+body.dark-theme .custom-modal-content {
+    background: #2a2a2a;
+}
+
+body.dark-theme .custom-modal-body p {
+    color: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        flex-direction: column;
+        margin: 20px;
+    }
+    
+    .register-left {
+        min-height: 300px;
+    }
+    
+    .register-right {
+        padding: 30px 20px;
+    }
+    
+    .register-card h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+
+<script>
+const modal = document.getElementById('customModal');
+const modalMessage = document.getElementById('modalMessage');
+const closeBtn = document.querySelector('.modal-close-btn');
+
+function showModal(message) {
+    modalMessage.textContent = message;
+    modal.style.display = 'flex';
+}
+
+closeBtn.onclick = function() {
+    modal.style.display = 'none';
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('confirmPassword');
+    
+    if (password.value.length < 6) {
+        e.preventDefault();
+        showModal('Пароль должен содержать минимум 6 символов');
+        return false;
+    }
+    
+    if (password.value !== confirm.value) {
+        e.preventDefault();
+        showModal('Пароли не совпадают');
+        return false;
+    }
+});
+</script>
+{% endblock %}

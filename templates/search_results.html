@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Результаты поиска: {{ query }}{% endblock %}
+
+{% block content %}
+<div class="search-results-wrapper">
+    <div class="search-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">ПОИСК</a>
+    </div>
+    
+    <h1 class="search-title">РЕЗУЛЬТАТЫ ПОИСКА: "{{ query }}"</h1>
+    <p class="search-count">Найдено товаров: {{ products|length }}</p>
+    
+    {% if products %}
+    <div class="search-grid">
+        {% for product in products %}
+        <div class="search-item" onclick="location.href='{{ url_for('product_detail', id=product.id) }}'">
+            <div class="search-item-image">
+                <div class="product-placeholder">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                {% if product.is_new %}
+                <span class="new-badge">NEW</span>
+                {% endif %}
+                {% if product.discount > 0 %}
+                <span class="discount-badge">-{{ product.discount }}%</span>
+                {% endif %}
+            </div>
+            <div class="search-item-info">
+                <h4>{{ product.name }}</h4>
+                <div class="price">
+                    {% if product.old_price %}
+                    <span class="old-price">{{ product.old_price }}₽</span>
+                    {% endif %}
+                    <span class="current-price">{{ product.price }}₽</span>
+                </div>
+                <div class="stars">★★★★★ ({{ product.reviews }})</div>
+                <button class="add-to-cart-btn search-cart-btn" data-id="{{ product.id }}" onclick="event.stopPropagation()">В КОРЗИНУ</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-search">
+        <i class="fas fa-search"></i>
+        <p>По вашему запросу "{{ query }}" ничего не найдено</p>
+        <p class="search-suggestion">Попробуйте изменить запрос или посмотрите другие категории</p>
+        <a href="{{ url_for('index') }}" class="btn-primary">НА ГЛАВНУЮ</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.search-results-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.search-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.search-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.search-breadcrumb a:hover {
+    color: #cc0000;
+}
+.search-title {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+.search-count {
+    text-align: center;
+    color: #666;
+    margin-bottom: 40px;
+}
+.search-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+.search-item {
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+.search-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.search-item-image {
+    background: #f9f9f9;
+    padding: 30px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+.product-placeholder {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-placeholder i {
+    font-size: 4rem;
+    color: #cc0000;
+}
+.new-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #cc0000;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.discount-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #ff4444;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+.search-item-info {
+    padding: 15px;
+    text-align: center;
+}
+.search-item-info h4 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+    min-height: 45px;
+}
+.old-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+.current-price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #cc0000;
+}
+.stars {
+    color: #ffc107;
+    font-size: 0.7rem;
+    margin: 8px 0;
+}
+.search-cart-btn {
+    width: 100%;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+.search-cart-btn:hover {
+    background: #cc0000;
+}
+.empty-search {
+    text-align: center;
+    padding: 80px 20px;
+}
+.empty-search i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+.empty-search p {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+.search-suggestion {
+    font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 30px;
+}
+.btn-primary {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background: #ff1a1a;
+}
+
+/* Темная тема */
+body.dark-theme .search-item {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .search-item-info h4 {
+    color: #e0e0e0;
+}
+body.dark-theme .search-count {
+    color: #aaa;
+}
+body.dark-theme .empty-search {
+    background: #2a2a2a;
+}
+body.dark-theme .empty-search p {
+    color: #e0e0e0;
+}
+body.dark-theme .search-suggestion {
+    color: #888;
+}
+
+@media (max-width: 768px) {
+    .search-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .search-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Добавление в корзину
+document.querySelectorAll('.search-cart-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const productId = this.dataset.id;
+        
+        fetch(`/add_to_cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ color: 'Черный', size: 'M' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Товар добавлен в корзину', 'success');
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) cartCount.textContent = data.cart_count;
+            } else {
+                showNotification('Ошибка при добавлении товара', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при добавлении товара', 'error');
+        });
+    });
+});
+
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}Избранное{% endblock %}
+
+{% block content %}
+<div class="wishlist-wrapper">
+    <div class="wishlist-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="#">ИЗБРАННОЕ</a>
+    </div>
+    
+    <h1 class="wishlist-title">ИЗБРАННЫЕ ТОВАРЫ</h1>
+    
+    <div id="wishlistContent">
+        <div class="wishlist-loading" style="text-align: center; padding: 50px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #cc0000;"></i>
+            <p>Загрузка избранного...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div id="deleteWishlistModal" class="custom-modal">
+    <div class="custom-modal-overlay"></div>
+    <div class="custom-modal-content">
+        <div class="custom-modal-header warning">
+            <i class="fas fa-trash-alt"></i>
+            <h3>УДАЛЕНИЕ ТОВАРА</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p id="deleteWishlistItemName">Вы уверены, что хотите удалить этот товар из избранного?</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-cancel" id="cancelWishlistDeleteBtn">НЕТ</button>
+            <button class="modal-confirm" id="confirmWishlistDeleteBtn">ДА, УДАЛИТЬ</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.wishlist-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.wishlist-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.wishlist-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.wishlist-breadcrumb a:hover {
+    color: #cc0000;
+}
+.wishlist-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+.wishlist-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s;
+    position: relative;
+}
+.wishlist-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+.wishlist-image {
+    position: relative;
+    padding: 20px;
+    background: #f9f9f9;
+    text-align: center;
+    cursor: pointer;
+}
+.product-square {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-square i {
+    font-size: 3rem;
+    color: #cc0000;
+}
+.remove-wishlist {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+}
+.remove-wishlist:hover {
+    background: #cc0000;
+    transform: scale(1.1);
+}
+.wishlist-info {
+    padding: 15px;
+    text-align: center;
+}
+.wishlist-info h3 {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    min-height: 45px;
+}
+.wishlist-info .price {
+    font-weight: bold;
+    color: #cc0000;
+    margin-bottom: 8px;
+}
+.wishlist-info .stars {
+    color: #ffc107;
+    font-size: 0.7rem;
+    margin-bottom: 12px;
+}
+.wishlist-cart-btn {
+    width: 100%;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.8rem;
+    transition: all 0.3s;
+}
+.wishlist-cart-btn:hover {
+    background: #cc0000;
+}
+.empty-wishlist {
+    text-align: center;
+    padding: 80px 20px;
+}
+.empty-wishlist i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+.empty-wishlist p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+.wishlist-loading {
+    text-align: center;
+    padding: 50px;
+}
+.wishlist-loading i {
+    font-size: 3rem;
+    color: #cc0000;
+    margin-bottom: 15px;
+}
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+.custom-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    z-index: 2001;
+    animation: modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.custom-modal-header {
+    padding: 20px;
+    text-align: center;
+}
+.custom-modal-header.warning {
+    background: #cc0000;
+    color: white;
+}
+.custom-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+.custom-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+.custom-modal-body {
+    padding: 25px;
+    text-align: center;
+}
+.custom-modal-body p {
+    font-size: 1rem;
+    color: #333;
+}
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.modal-cancel, .modal-confirm {
+    padding: 10px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+.modal-cancel {
+    background: #eee;
+    color: #666;
+}
+.modal-cancel:hover {
+    background: #ddd;
+    transform: translateY(-2px);
+}
+.modal-confirm {
+    background: #cc0000;
+    color: white;
+}
+.modal-confirm:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.btn-primary {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+}
+.btn-primary:hover {
+    background: #ff1a1a;
+}
+
+/* Темная тема */
+body.dark-theme .wishlist-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .wishlist-info h3 {
+    color: #e0e0e0;
+}
+body.dark-theme .empty-wishlist {
+    background: #2a2a2a;
+}
+body.dark-theme .empty-wishlist p {
+    color: #aaa;
+}
+body.dark-theme .wishlist-loading p {
+    color: #aaa;
+}
+body.dark-theme .custom-modal-content {
+    background: #2a2a2a;
+}
+body.dark-theme .custom-modal-body p {
+    color: #e0e0e0;
+}
+body.dark-theme .modal-cancel {
+    background: #444;
+    color: #e0e0e0;
+}
+body.dark-theme .modal-cancel:hover {
+    background: #555;
+}
+
+@media (max-width: 768px) {
+    .wishlist-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+let wishlistItemToDelete = null;
+
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+function openWishlistDeleteModal(productId, productName) {
+    wishlistItemToDelete = productId;
+    const deleteItemName = document.getElementById('deleteWishlistItemName');
+    if (deleteItemName) {
+        deleteItemName.innerHTML = `Вы уверены, что хотите удалить "${productName}" из избранного?`;
+    }
+    const modal = document.getElementById('deleteWishlistModal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeWishlistDeleteModal() {
+    const modal = document.getElementById('deleteWishlistModal');
+    if (modal) modal.style.display = 'none';
+    wishlistItemToDelete = null;
+}
+
+// Загрузка избранного
+function loadWishlist() {
+    fetch('/wishlist-data')
+        .then(response => response.json())
+        .then(data => {
+            renderWishlist(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('wishlistContent').innerHTML = `
+                <div class="empty-wishlist">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Ошибка загрузки избранного</p>
+                    <button onclick="loadWishlist()" class="btn-primary">ПОВТОРИТЬ</button>
+                </div>
+            `;
+        });
+}
+
+function renderWishlist(data) {
+    const wishlistContent = document.getElementById('wishlistContent');
+    
+    if (!data.items || data.items.length === 0) {
+        wishlistContent.innerHTML = `
+            <div class="empty-wishlist">
+                <i class="far fa-heart"></i>
+                <p>У ВАС ПОКА НЕТ ИЗБРАННЫХ ТОВАРОВ</p>
+                <a href="{{ url_for('index') }}" class="btn-primary">ПЕРЕЙТИ В КАТАЛОГ</a>
+            </div>
+        `;
+        return;
+    }
+    
+    let itemsHtml = `<div class="wishlist-grid">`;
+    
+    for (const item of data.items) {
+        itemsHtml += `
+            <div class="wishlist-card" data-product-id="${item.id}">
+                <div class="wishlist-image" onclick="location.href='/product/${item.id}'">
+                    <div class="product-square">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <button class="remove-wishlist" data-id="${item.id}" data-name="${escapeHtml(item.name)}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="wishlist-info">
+                    <h3>${escapeHtml(item.name)}</h3>
+                    <div class="price">${item.price}₽</div>
+                    <div class="stars">★★★★★ (${item.reviews})</div>
+                    <button class="wishlist-cart-btn add-to-cart-from-wishlist" data-id="${item.id}">В КОРЗИНУ</button>
+                </div>
+            </div>
+        `;
+    }
+    
+    itemsHtml += `</div>`;
+    wishlistContent.innerHTML = itemsHtml;
+    
+    // Навешиваем обработчики на кнопки удаления
+    document.querySelectorAll('.remove-wishlist').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const productId = this.dataset.id;
+            const productName = this.dataset.name || 'товар';
+            openWishlistDeleteModal(productId, productName);
+        });
+    });
+    
+    // Навешиваем обработчики на кнопки добавления в корзину
+    document.querySelectorAll('.add-to-cart-from-wishlist').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const productId = this.dataset.id;
+            
+            fetch(`/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ color: 'Черный', size: 'M' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Товар добавлен в корзину', 'success');
+                    const cartCount = document.getElementById('cartCount');
+                    if (cartCount) cartCount.textContent = data.cart_count;
+                } else {
+                    showNotification('Ошибка при добавлении товара', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка при добавлении товара', 'error');
+            });
+        });
+    });
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Подтверждение удаления из избранного
+document.getElementById('confirmWishlistDeleteBtn')?.addEventListener('click', function() {
+    if (wishlistItemToDelete) {
+        fetch(`/remove_from_wishlist/${wishlistItemToDelete}`, {
+            method: 'GET',
+        })
+        .then(response => {
+            if (response.ok) {
+                showNotification('Товар удален из избранного', 'success');
+                loadWishlist(); // Перезагружаем список
+            } else {
+                showNotification('Ошибка при удалении', 'error');
+            }
+            closeWishlistDeleteModal();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Ошибка при удалении товара', 'error');
+            closeWishlistDeleteModal();
+        });
+    } else {
+        closeWishlistDeleteModal();
+    }
+});
+
+// Отмена удаления
+document.getElementById('cancelWishlistDeleteBtn')?.addEventListener('click', closeWishlistDeleteModal);
+
+// Закрытие модального окна при клике на overlay
+const wishlistModalOverlay = document.querySelector('#deleteWishlistModal .custom-modal-overlay');
+if (wishlistModalOverlay) {
+    wishlistModalOverlay.addEventListener('click', closeWishlistDeleteModal);
+}
+
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeWishlistDeleteModal();
+});
+
+// Загружаем избранное при загрузке страницы
+loadWishlist();
+</script>
+{% endblock %}

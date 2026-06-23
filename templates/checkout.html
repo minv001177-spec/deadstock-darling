@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа{% endblock %}
+
+{% block content %}
+<div class="checkout-wrapper">
+    <div class="checkout-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / <a href="{{ url_for('cart') }}">КОРЗИНА</a> / <a href="#">ОФОРМЛЕНИЕ</a>
+    </div>
+
+    <h1 class="checkout-title">ОФОРМЛЕНИЕ ЗАКАЗА</h1>
+
+    <div class="checkout-container">
+        <div class="checkout-items">
+            <div class="checkout-items-header">
+                <div>ТОВАР</div>
+                <div>ЦВЕТ/РАЗМЕР</div>
+                <div>ЦЕНА</div>
+                <div>КОЛИЧЕСТВО</div>
+                <div>СУММА</div>
+            </div>
+            
+            <div id="checkoutItemsList">
+                <!-- Товары будут загружены -->
+            </div>
+            
+            <div class="checkout-actions">
+                <a href="{{ url_for('cart') }}" class="checkout-back-btn">← ВЕРНУТЬСЯ В КОРЗИНУ</a>
+            </div>
+        </div>
+        
+        <div class="checkout-summary">
+            <div class="checkout-total">
+                <h3>ИТОГО</h3>
+                <div class="summary-row">
+                    <span>Товары (<span id="itemsCount">0</span>):</span>
+                    <span id="checkoutTotalPrice">0</span>₽
+                </div>
+                <div class="summary-row">
+                    <span>Доставка:</span>
+                    <span>Бесплатно</span>
+                </div>
+                <div class="summary-total">
+                    <span>Общее:</span>
+                    <span id="checkoutGrandTotal">0</span>₽
+                </div>
+            </div>
+            
+            <div class="checkout-delivery">
+                <h3>СПОСОБ ДОСТАВКИ</h3>
+                <label class="delivery-option">
+                    <input type="radio" name="delivery" value="courier" checked> Курьером (бесплатно)
+                </label>
+                <label class="delivery-option">
+                    <input type="radio" name="delivery" value="pickup"> Пункт выдачи (бесплатно)
+                </label>
+                <label class="delivery-option">
+                    <input type="radio" name="delivery" value="post"> Почта России (200₽)
+                </label>
+            </div>
+            
+            <div class="checkout-payment">
+                <h3>СПОСОБ ОПЛАТЫ</h3>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="card" checked> Картой онлайн
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="cash"> Наличными при получении
+                </label>
+                <div class="card-preview" id="cardPreview">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-mir"></i>
+                    <span id="cardStatus">Нет привязанных карт</span>
+                    <a href="{{ url_for('cards_list') }}" class="add-card-link">+ Добавить карту</a>
+                </div>
+            </div>
+            
+            <button class="checkout-pay-btn" id="checkoutPayBtn">ПЕРЕЙТИ К ОПЛАТЕ →</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно успешного заказа -->
+<div id="successModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header success">
+            <i class="fas fa-check-circle"></i>
+            <h3>ЗАКАЗ ОФОРМЛЕН!</h3>
+        </div>
+        <div class="custom-modal-body">
+            <p>Спасибо за покупку! Мы свяжемся с вами в ближайшее время.</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button class="modal-confirm" onclick="completeOrder()">ОТЛИЧНО!</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.checkout-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.checkout-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.checkout-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+}
+.checkout-breadcrumb a:hover {
+    color: #cc0000;
+}
+.checkout-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+.checkout-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+.checkout-items {
+    background: #f9f9f9;
+    border-radius: 15px;
+    padding: 20px;
+}
+.checkout-items-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 0.8fr;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    border: 1px solid #eee;
+}
+.checkout-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr 0.8fr 0.8fr 0.8fr;
+    align-items: center;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+}
+.checkout-item-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.mini-placeholder {
+    width: 50px;
+    height: 50px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mini-placeholder i {
+    font-size: 1.2rem;
+    color: #cc0000;
+}
+.checkout-item-details h3 {
+    font-size: 0.85rem;
+    margin: 0;
+}
+.checkout-item-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.option-badge {
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+}
+.option-badge:first-child {
+    background: #fff0f0;
+    color: #cc0000;
+}
+.option-badge:last-child {
+    background: #f0f0ff;
+    color: #3366cc;
+}
+.checkout-item-price, .checkout-item-total {
+    font-weight: bold;
+    color: #cc0000;
+}
+.checkout-actions {
+    margin-top: 20px;
+}
+.checkout-back-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background: none;
+    color: #cc0000;
+    border: 1px solid #cc0000;
+    transition: all 0.3s;
+}
+.checkout-back-btn:hover {
+    background: #cc0000;
+    color: white;
+}
+.checkout-summary {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #eee;
+    height: fit-content;
+}
+.checkout-total h3, .checkout-delivery h3, .checkout-payment h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: #666;
+}
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #cc0000;
+}
+.delivery-option, .payment-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.checkout-delivery, .checkout-payment {
+    margin-top: 25px;
+}
+.card-preview {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    flex-wrap: wrap;
+}
+.card-preview i {
+    font-size: 2rem;
+    color: #888;
+}
+.card-preview span {
+    color: #999;
+    font-size: 0.8rem;
+}
+.add-card-link {
+    color: #cc0000;
+    text-decoration: none;
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+.add-card-link:hover {
+    text-decoration: underline;
+}
+.checkout-pay-btn {
+    width: 100%;
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    margin-top: 25px;
+    cursor: pointer;
+    font-family: 'Arsenal SC', monospace;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+.checkout-pay-btn:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.checkout-pay-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+.custom-modal-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s;
+}
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+.custom-modal-header {
+    padding: 20px;
+    text-align: center;
+}
+.custom-modal-header.success {
+    background: #4caf50;
+    color: white;
+}
+.custom-modal-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+.custom-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+.custom-modal-body {
+    padding: 25px;
+    text-align: center;
+}
+.custom-modal-body p {
+    font-size: 1rem;
+    color: #333;
+}
+.custom-modal-footer {
+    padding: 15px 20px 25px;
+    display: flex;
+    justify-content: center;
+}
+.modal-confirm {
+    padding: 10px 35px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: #4caf50;
+    color: white;
+    font-family: 'Arsenal SC', monospace;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+.modal-confirm:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+.empty-checkout {
+    text-align: center;
+    padding: 60px 20px;
+}
+.empty-checkout i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+.empty-checkout p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+.btn-primary {
+    display: inline-block;
+    background: #cc0000;
+    color: white;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+.btn-primary:hover {
+    background: #ff1a1a;
+}
+
+/* ========== ТЕМНАЯ ТЕМА ДЛЯ ОФОРМЛЕНИЯ ========== */
+body.dark-theme .checkout-items {
+    background: #2a2a2a;
+}
+body.dark-theme .checkout-items-header {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #444;
+}
+body.dark-theme .checkout-item {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .checkout-item-details h3 {
+    color: #e0e0e0;
+}
+body.dark-theme .checkout-item-options .option-badge {
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+body.dark-theme .checkout-item-options .option-badge:first-child {
+    background: #3a2a2a;
+    border-color: #ff6666;
+    color: #ff9999;
+}
+body.dark-theme .checkout-item-options .option-badge:last-child {
+    background: #2a2a3a;
+    border-color: #6699ff;
+    color: #9999ff;
+}
+body.dark-theme .checkout-item-price,
+body.dark-theme .checkout-item-total {
+    color: #ff6666;
+}
+body.dark-theme .checkout-summary {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .checkout-summary h3 {
+    color: #e0e0e0;
+    border-bottom-color: #555;
+}
+body.dark-theme .summary-row {
+    color: #aaa;
+}
+body.dark-theme .summary-total {
+    color: #ff6666;
+    border-top-color: #555;
+}
+body.dark-theme .delivery-option,
+body.dark-theme .payment-option {
+    color: #e0e0e0;
+}
+body.dark-theme .card-preview {
+    border-top-color: #555;
+}
+body.dark-theme .card-preview span {
+    color: #aaa;
+}
+body.dark-theme .checkout-back-btn {
+    border-color: #ff6666;
+    color: #ff6666;
+}
+body.dark-theme .checkout-back-btn:hover {
+    background: #ff6666;
+    color: #1a1a1a;
+}
+body.dark-theme .custom-modal-content {
+    background: #2a2a2a;
+}
+body.dark-theme .custom-modal-body p {
+    color: #e0e0e0;
+}
+body.dark-theme .empty-checkout {
+    background: #2a2a2a;
+}
+body.dark-theme .empty-checkout p {
+    color: #aaa;
+}
+body.dark-theme .empty-checkout i {
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    .checkout-container {
+        grid-template-columns: 1fr;
+    }
+    .checkout-items-header {
+        display: none;
+    }
+    .checkout-item {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+    }
+    .checkout-item-info {
+        justify-content: center;
+    }
+    .checkout-item-options {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+let currentSelectedItems = [];
+
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+function completeOrder() {
+    document.getElementById('successModal').style.display = 'none';
+    
+    // Удаляем выбранные товары из корзины
+    if (currentSelectedItems.length > 0) {
+        const itemIds = currentSelectedItems.map(item => item.cart_item_id);
+        
+        fetch('/remove_selected_from_cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item_ids: itemIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) cartCount.textContent = data.cart_count;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    
+    // Перенаправляем на главную
+    window.location.href = "{{ url_for('index') }}";
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Получаем выбранные товары из URL параметров
+    const urlParams = new URLSearchParams(window.location.search);
+    const idsParam = urlParams.get('ids');
+    const quantitiesParam = urlParams.get('quantities');
+    
+    const checkoutItemsList = document.getElementById('checkoutItemsList');
+    
+    if (!idsParam || !quantitiesParam) {
+        checkoutItemsList.innerHTML = `
+            <div class="empty-checkout">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Нет выбранных товаров</p>
+                <a href="{{ url_for('cart') }}" class="btn-primary">Вернуться в корзину</a>
+            </div>
+        `;
+        return;
+    }
+    
+    const ids = idsParam.split(',').map(Number);
+    const quantities = quantitiesParam.split(',').map(Number);
+    
+    // Получаем данные о корзине через API
+    fetch('/api/cart/items')
+        .then(response => response.json())
+        .then(cartItems => {
+            let total = 0;
+            let itemsHtml = '';
+            
+            for (let i = 0; i < ids.length; i++) {
+                const cartItem = cartItems.find(item => item.id === ids[i]);
+                if (cartItem) {
+                    const quantity = quantities[i];
+                    const itemTotal = cartItem.price * quantity;
+                    total += itemTotal;
+                    currentSelectedItems.push({
+                        cart_item_id: cartItem.id,
+                        product_id: cartItem.product_id,
+                        quantity: quantity
+                    });
+                    
+                    itemsHtml += `
+                        <div class="checkout-item">
+                            <div class="checkout-item-info">
+                                <div class="mini-placeholder">
+                                    <i class="fas fa-tshirt"></i>
+                                </div>
+                                <div class="checkout-item-details">
+                                    <h3>${escapeHtml(cartItem.name)}</h3>
+                                </div>
+                            </div>
+                            <div class="checkout-item-options">
+                                <span class="option-badge">🎨 ${escapeHtml(cartItem.color)}</span>
+                                <span class="option-badge">📏 ${escapeHtml(cartItem.size)}</span>
+                            </div>
+                            <div class="checkout-item-price">${cartItem.price}₽</div>
+                            <div class="checkout-item-quantity">${quantity}</div>
+                            <div class="checkout-item-total">${itemTotal}₽</div>
+                        </div>
+                    `;
+                }
+            }
+            
+            checkoutItemsList.innerHTML = itemsHtml;
+            document.getElementById('itemsCount').textContent = currentSelectedItems.length;
+            document.getElementById('checkoutTotalPrice').textContent = total;
+            document.getElementById('checkoutGrandTotal').textContent = total;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            checkoutItemsList.innerHTML = `
+                <div class="empty-checkout">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Ошибка загрузки товаров</p>
+                    <a href="{{ url_for('cart') }}" class="btn-primary">Вернуться в корзину</a>
+                </div>
+            `;
+        });
+    
+    // Проверка наличия карт
+    const cards = JSON.parse(localStorage.getItem('userCards') || '[]');
+    const cardStatus = document.getElementById('cardStatus');
+    if (cardStatus) {
+        if (cards.length === 0) {
+            cardStatus.textContent = 'Нет привязанных карт';
+            cardStatus.style.color = '#ff4444';
+        } else {
+            cardStatus.textContent = `Привязана карта ${cards[0].type.toUpperCase()} **** ${cards[0].number.slice(-4)}`;
+            cardStatus.style.color = '#4caf50';
+        }
+    }
+    
+    // Оформление заказа
+    document.getElementById('checkoutPayBtn')?.addEventListener('click', function() {
+        const cards = JSON.parse(localStorage.getItem('userCards') || '[]');
+        if (cards.length === 0) {
+            showNotification('Пожалуйста, привяжите карту в разделе "Мои карты"', 'error');
+            return;
+        }
+        document.getElementById('successModal').style.display = 'flex';
+    });
+});
+
+// Функция для экранирования HTML
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Стили для уведомлений
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+    .custom-notification {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: #1a1a1a;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 2000;
+        transform: translateX(120%);
+        transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        min-width: 280px;
+        max-width: 380px;
+        overflow: hidden;
+    }
+    body.dark-theme .custom-notification {
+        background: #2a2a2a;
+    }
+    .custom-notification.show {
+        transform: translateX(0);
+    }
+    .custom-notification.success {
+        border-left: 4px solid #4caf50;
+    }
+    .custom-notification.error {
+        border-left: 4px solid #ff4444;
+    }
+    .notification-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+    }
+    .custom-notification.success .notification-content i {
+        color: #4caf50;
+        font-size: 1.2rem;
+    }
+    .custom-notification.error .notification-content i {
+        color: #ff4444;
+        font-size: 1.2rem;
+    }
+    .notification-content span {
+        font-size: 0.85rem;
+        color: #ffffff;
+    }
+    @media (max-width: 480px) {
+        .custom-notification {
+            left: 20px;
+            right: 20px;
+            min-width: auto;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(notificationStyles);
+</script>
+{% endblock %}

@@ -1,0 +1,937 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="product-detail-wrapper">
+    <!-- Хлебные крошки -->
+    <div class="product-breadcrumb">
+        <a href="{{ url_for('index') }}">ГЛАВНЫЙ ЭКРАН</a> / 
+        <a href="{{ url_for('category', category_name=product.category) }}">{{ product.category|upper }}</a> / 
+        <span>{{ product.name }}</span>
+    </div>
+
+    <div class="product-detail-container">
+        <!-- Левая часть - изображение -->
+        <div class="product-detail-image">
+            <div class="product-main-image">
+                {% if product.image_url %}
+                <img src="{{ url_for('static', filename='images/' + product.image_url) }}" 
+                     alt="{{ product.name }}"
+                     class="product-detail-image-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="image-placeholder" style="display: none;">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                {% else %}
+                <div class="image-placeholder">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                {% endif %}
+                {% if product.is_new %}
+                <span class="product-new-badge">NEW</span>
+                {% endif %}
+                {% if product.discount > 0 %}
+                <span class="product-discount-badge">-{{ product.discount }}%</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Правая часть - информация -->
+        <div class="product-detail-info">
+            <div class="product-header">
+                <h1 class="product-title">{{ product.name }}</h1>
+                <button class="wishlist-heart-btn" data-id="{{ product.id }}" id="wishlistHeartBtn">
+                    <i class="far fa-heart"></i>
+                    <span class="heart-tooltip">В избранное</span>
+                </button>
+            </div>
+            
+            <div class="product-rating">
+                <div class="stars">
+                    {% for i in range(5) %}
+                        {% if i < product.rating|round(0)|int %}
+                            ★
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="rating-count">({{ product.reviews }} отзывов)</span>
+            </div>
+            
+            <div class="product-price">
+                {% if product.old_price %}
+                <span class="old-price">{{ product.old_price }}₽</span>
+                {% endif %}
+                <span class="current-price">{{ product.price }}₽</span>
+                {% if product.discount > 0 %}
+                <span class="discount-label">-{{ product.discount }}%</span>
+                {% endif %}
+            </div>
+            
+            <div class="product-description">
+                <p>{{ product.description or 'Стильная вещь из новой коллекции. Отличное качество и уникальный дизайн.' }}</p>
+            </div>
+            
+            <!-- Цвета -->
+            <div class="product-colors">
+                <h4>ЦВЕТА:</h4>
+                <div class="color-options" id="colorOptions">
+                    <span class="color-circle" data-color="Черный" style="background-color: #000;"></span>
+                    <span class="color-circle" data-color="Белый" style="background-color: #fff; border: 1px solid #ddd;"></span>
+                    <span class="color-circle" data-color="Красный" style="background-color: #cc0000;"></span>
+                    <span class="color-circle" data-color="Серый" style="background-color: #808080;"></span>
+                    <span class="color-circle" data-color="Синий" style="background-color: #1a237e;"></span>
+                    <span class="color-circle" data-color="Розовый" style="background-color: #ff69b4;"></span>
+                </div>
+                <input type="hidden" id="selectedColor" value="Черный">
+            </div>
+            
+            <!-- Размеры -->
+            <div class="product-sizes">
+                <h4>РАЗМЕР:</h4>
+                <div class="size-options" id="sizeOptions">
+                    <span class="size-option" data-size="XS">XS</span>
+                    <span class="size-option" data-size="S">S</span>
+                    <span class="size-option" data-size="M" style="border-color: #cc0000; background: #cc0000; color: white;">M</span>
+                    <span class="size-option" data-size="L">L</span>
+                    <span class="size-option" data-size="XL">XL</span>
+                </div>
+                <input type="hidden" id="selectedSize" value="M">
+            </div>
+            
+            <!-- Кнопка добавления в корзину -->
+            <button class="product-add-to-cart-btn" id="addToCartBtn">
+                <i class="fas fa-shopping-cart"></i> ДОБАВИТЬ В КОРЗИНУ
+            </button>
+            
+            <!-- Информация о доставке -->
+            <div class="product-delivery-info">
+                <div class="delivery-item">
+                    <i class="fas fa-truck"></i>
+                    <div>
+                        <strong>Бесплатная доставка</strong>
+                        <p>При заказе от 1500₽</p>
+                    </div>
+                </div>
+                <div class="delivery-item">
+                    <i class="fas fa-undo-alt"></i>
+                    <div>
+                        <strong>Возврат товара</strong>
+                        <p>В течение 14 дней</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Рекомендации -->
+    <div class="product-recommendations">
+        <h2 class="recommendations-title">РЕКОМЕНДАЦИИ! (P≥W≤Q)</h2>
+        <div class="recommendations-grid">
+            {% for related_product in related %}
+            <div class="recommendation-card" onclick="location.href='{{ url_for('product_detail', id=related_product.id) }}'">
+                <div class="rec-image">
+                    {% if related_product.image_url %}
+                    <img src="{{ url_for('static', filename='images/' + related_product.image_url) }}" 
+                         alt="{{ related_product.name }}"
+                         class="rec-product-image"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>'">
+                    {% else %}
+                    <i class="fas fa-tshirt"></i>
+                    {% endif %}
+                </div>
+                <h4>{{ related_product.name }}</h4>
+                <div class="rec-price">
+                    {% if related_product.old_price %}
+                    <span class="old-price">{{ related_product.old_price }}₽</span>
+                    {% endif %}
+                    <span class="current-price">{{ related_product.price }}₽</span>
+                </div>
+                <div class="rec-stars">★★★★★ ({{ related_product.reviews }})</div>
+                <button class="rec-cart-btn add-to-cart-quick" data-id="{{ related_product.id }}">В КОРЗИНУ</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.product-detail-wrapper {
+    padding: 40px 0;
+    min-height: 70vh;
+}
+.product-breadcrumb {
+    margin-bottom: 30px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.product-breadcrumb a {
+    color: #999;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+.product-breadcrumb a:hover {
+    color: #cc0000;
+}
+.product-breadcrumb span {
+    color: #cc0000;
+}
+.product-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    margin-bottom: 60px;
+}
+.product-main-image {
+    position: relative;
+    background: #f9f9f9;
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    border: 1px solid #eee;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-detail-image-img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+.image-placeholder {
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.image-placeholder i {
+    font-size: 8rem;
+    color: #cc0000;
+}
+.product-new-badge {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: #cc0000;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.product-discount-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #ff4444;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+.product-title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+    flex: 1;
+}
+/* Кнопка избранного */
+.wishlist-heart-btn {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    flex-shrink: 0;
+}
+.wishlist-heart-btn i {
+    color: #cc0000;
+    transition: all 0.3s ease;
+}
+.wishlist-heart-btn:hover {
+    transform: scale(1.1);
+    background: #cc0000;
+    border-color: #cc0000;
+}
+.wishlist-heart-btn:hover i {
+    color: white;
+}
+.wishlist-heart-btn.active {
+    background: #cc0000;
+    border-color: #cc0000;
+    animation: heartBeat 0.5s ease;
+}
+.wishlist-heart-btn.active i {
+    color: white;
+}
+.wishlist-heart-btn.active .heart-tooltip {
+    background: #cc0000;
+}
+.heart-tooltip {
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    pointer-events: none;
+}
+.wishlist-heart-btn:hover .heart-tooltip {
+    opacity: 1;
+    visibility: visible;
+    top: -40px;
+}
+/* Анимация сердечка */
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    50% { transform: scale(1.1); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.wishlist-heart-btn.pulse {
+    animation: heartPulse 0.4s ease;
+}
+@keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.product-detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.product-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.product-rating .stars {
+    color: #ffc107;
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+.rating-count {
+    color: #666;
+    font-size: 0.8rem;
+}
+.product-price {
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+}
+.product-price .old-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 1.1rem;
+}
+.product-price .current-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #cc0000;
+}
+.discount-label {
+    background: #ff4444;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+.product-description p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+.product-colors h4, .product-sizes h4 {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: #333;
+}
+.color-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.color-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.color-circle:hover {
+    transform: scale(1.1);
+}
+.color-circle.active {
+    border-color: #cc0000;
+    box-shadow: 0 0 0 2px rgba(204,0,0,0.3);
+}
+.size-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.size-option {
+    width: 55px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    background: white;
+}
+.size-option:hover {
+    border-color: #cc0000;
+}
+.size-option.active {
+    border-color: #cc0000;
+    background: #cc0000;
+    color: white;
+}
+.product-add-to-cart-btn {
+    background: #cc0000;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+    font-family: 'Arsenal SC', monospace;
+}
+.product-add-to-cart-btn:hover {
+    background: #ff1a1a;
+    transform: translateY(-2px);
+}
+.product-add-to-cart-btn:disabled {
+    background: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+.product-delivery-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+.delivery-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.delivery-item i {
+    font-size: 1.5rem;
+    color: #cc0000;
+}
+.delivery-item strong {
+    font-size: 0.8rem;
+    display: block;
+}
+.delivery-item p {
+    font-size: 0.7rem;
+    color: #999;
+    margin: 0;
+}
+.product-recommendations {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+.recommendations-title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 30px;
+    color: #1a1a1a;
+}
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+}
+.recommendation-card {
+    background: #ffffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+.rec-image {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+.rec-product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.rec-image i {
+    font-size: 3rem;
+    color: #cc0000;
+}
+.recommendation-card h4 {
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+    min-height: 40px;
+}
+.rec-price {
+    margin-bottom: 8px;
+}
+.rec-price .old-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 0.7rem;
+    margin-right: 5px;
+}
+.rec-price .current-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #cc0000;
+}
+.rec-stars {
+    color: #ffc107;
+    font-size: 0.6rem;
+    margin-bottom: 10px;
+}
+.rec-cart-btn {
+    width: 100%;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-family: 'Arsenal SC', monospace;
+    transition: all 0.3s;
+}
+.rec-cart-btn:hover {
+    background: #cc0000;
+}
+.rec-cart-btn:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+.custom-notification {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 2000;
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    min-width: 280px;
+    max-width: 380px;
+    overflow: hidden;
+}
+.custom-notification.show {
+    transform: translateX(0);
+}
+.custom-notification.success {
+    border-left: 4px solid #4caf50;
+}
+.custom-notification.error {
+    border-left: 4px solid #ff4444;
+}
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+}
+.custom-notification.success .notification-content i {
+    color: #4caf50;
+    font-size: 1.2rem;
+}
+.custom-notification.error .notification-content i {
+    color: #ff4444;
+    font-size: 1.2rem;
+}
+.notification-content span {
+    font-size: 0.85rem;
+    color: #ffffff;
+}
+body.dark-theme .product-main-image {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .product-title {
+    color: #e0e0e0;
+}
+body.dark-theme .product-description p {
+    color: #aaa;
+}
+body.dark-theme .product-colors h4,
+body.dark-theme .product-sizes h4 {
+    color: #e0e0e0;
+}
+body.dark-theme .size-option {
+    background: #3a3a3a;
+    border-color: #555;
+    color: #e0e0e0;
+}
+body.dark-theme .size-option.active {
+    background: #cc0000;
+    color: white;
+}
+body.dark-theme .recommendation-card {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .recommendation-card h4 {
+    color: #e0e0e0;
+}
+body.dark-theme .rec-price .current-price {
+    color: #ff6666;
+}
+body.dark-theme .rec-cart-btn {
+    background: #444;
+    color: #e0e0e0;
+}
+body.dark-theme .rec-cart-btn:hover {
+    background: #cc0000;
+}
+body.dark-theme .delivery-item strong {
+    color: #e0e0e0;
+}
+body.dark-theme .delivery-item p {
+    color: #aaa;
+}
+body.dark-theme .wishlist-heart-btn {
+    background: #2a2a2a;
+    border-color: #444;
+}
+body.dark-theme .wishlist-heart-btn i {
+    color: #ff6666;
+}
+body.dark-theme .wishlist-heart-btn.active {
+    background: #cc0000;
+}
+body.dark-theme .heart-tooltip {
+    background: #444;
+}
+@media (max-width: 768px) {
+    .product-detail-container {
+        grid-template-columns: 1fr;
+    }
+    .recommendations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .product-title {
+        font-size: 1.3rem;
+    }
+    .product-price .current-price {
+        font-size: 1.5rem;
+    }
+    .product-main-image {
+        min-height: 300px;
+    }
+    .product-detail-image-img {
+        max-height: 250px;
+    }
+    .image-placeholder {
+        height: 250px;
+    }
+    .image-placeholder i {
+        font-size: 5rem;
+    }
+    .custom-notification {
+        left: 20px;
+        right: 20px;
+        min-width: auto;
+        max-width: none;
+    }
+    .product-header {
+        flex-wrap: wrap;
+    }
+}
+@media (max-width: 480px) {
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Функция показа уведомлений
+function showNotification(message, type) {
+    const oldNotifications = document.querySelectorAll('.custom-notification');
+    oldNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `custom-notification ${type}`;
+    notification.innerHTML = `<div class="notification-content"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span></div>`;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 2500);
+}
+
+// Блокировка кнопок
+let isAddingToCart = false;
+let isTogglingWishlist = false;
+
+// Проверка, есть ли товар в избранном (при загрузке страницы)
+function checkWishlistStatus() {
+    const productId = {{ product.id }};
+    fetch(`/api/wishlist/check/${productId}`)
+        .then(response => response.json())
+        .then(data => {
+            const wishlistBtn = document.getElementById('wishlistHeartBtn');
+            if (data.in_wishlist && wishlistBtn) {
+                wishlistBtn.classList.add('active');
+                wishlistBtn.innerHTML = '<i class="fas fa-heart"></i><span class="heart-tooltip">В избранном</span>';
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Выбор цвета
+document.querySelectorAll('.color-circle').forEach(circle => {
+    circle.addEventListener('click', function() {
+        document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        const color = this.dataset.color;
+        document.getElementById('selectedColor').value = color;
+    });
+});
+
+// Выбор размера
+document.querySelectorAll('.size-option').forEach(size => {
+    size.addEventListener('click', function() {
+        document.querySelectorAll('.size-option').forEach(s => s.classList.remove('active'));
+        this.classList.add('active');
+        const sizeVal = this.dataset.size;
+        document.getElementById('selectedSize').value = sizeVal;
+    });
+});
+
+// Добавление/удаление из избранного (лайк/анлайк)
+const wishlistBtn = document.getElementById('wishlistHeartBtn');
+if (wishlistBtn) {
+    wishlistBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (isTogglingWishlist) return;
+        
+        const productId = this.dataset.id;
+        const isActive = this.classList.contains('active');
+        
+        isTogglingWishlist = true;
+        
+        this.classList.add('pulse');
+        setTimeout(() => {
+            this.classList.remove('pulse');
+        }, 400);
+        
+        if (isActive) {
+            fetch(`/remove_from_wishlist/${productId}`, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.remove('active');
+                    this.innerHTML = '<i class="far fa-heart"></i><span class="heart-tooltip">В избранное</span>';
+                    showNotification('Товар удален из избранного', 'success');
+                } else {
+                    showNotification('Ошибка при удалении из избранного', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка при удалении из избранного', 'error');
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    isTogglingWishlist = false;
+                }, 500);
+            });
+        } else {
+            fetch(`/add_to_wishlist/${productId}`, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.classList.add('active');
+                    this.innerHTML = '<i class="fas fa-heart"></i><span class="heart-tooltip">В избранном</span>';
+                    this.style.animation = 'heartBeat 0.5s ease';
+                    setTimeout(() => {
+                        this.style.animation = '';
+                    }, 500);
+                    showNotification('Товар добавлен в избранное', 'success');
+                } else {
+                    showNotification(data.message || 'Ошибка при добавлении в избранное', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Ошибка при добавлении в избранное', 'error');
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    isTogglingWishlist = false;
+                }, 500);
+            });
+        }
+    });
+}
+
+// Добавление в корзину
+document.getElementById('addToCartBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    if (isAddingToCart) {
+        return;
+    }
+    
+    const productId = {{ product.id }};
+    const color = document.getElementById('selectedColor').value;
+    const size = document.getElementById('selectedSize').value;
+    const btn = this;
+    
+    isAddingToCart = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ДОБАВЛЕНИЕ...';
+    btn.disabled = true;
+    
+    fetch(`/add_to_cart/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ color: color, size: size })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Товар добавлен в корзину (${color}, ${size})`, 'success');
+            const cartCount = document.getElementById('cartCount');
+            if (cartCount) cartCount.textContent = data.cart_count;
+        } else {
+            showNotification('Ошибка при добавлении товара', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Ошибка при добавлении товара', 'error');
+    })
+    .finally(() => {
+        setTimeout(() => {
+            isAddingToCart = false;
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 1000);
+    });
+});
+
+// Быстрое добавление из рекомендаций
+document.querySelectorAll('.add-to-cart-quick').forEach(btn => {
+    let isQuickAdding = false;
+    
+    btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        
+        if (isQuickAdding) return;
+        
+        const productId = this.dataset.id;
+        isQuickAdding = true;
+        const originalText = this.textContent;
+        this.textContent = '...';
+        this.disabled = true;
+        
+        fetch(`/add_to_cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ color: 'Черный', size: 'M' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Товар добавлен в корзину', 'success');
+                const cartCount = document.getElementById('cartCount');
+                if (cartCount) cartCount.textContent = data.cart_count;
+            }
+        })
+        .catch(error => console.error('Error:', error))
+        .finally(() => {
+            setTimeout(() => {
+                isQuickAdding = false;
+                this.textContent = originalText;
+                this.disabled = false;
+            }, 500);
+        });
+    });
+});
+
+// Активируем первый цвет и размер по умолчанию
+document.querySelector('.color-circle')?.classList.add('active');
+
+// Проверяем статус избранного при загрузке
+checkWishlistStatus();
+</script>
+{% endblock %}
