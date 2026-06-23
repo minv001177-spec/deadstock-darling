@@ -1,0 +1,54 @@
+name: CI/CD Pipeline - Deadstock Darling
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  # ========== JOB 1: ТЕСТИРОВАНИЕ ==========
+  test:
+    name: 🧪 Запуск тестов
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Клонирование репозитория
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Установка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 📦 Установка зависимостей
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov selenium webdriver-manager
+      
+      - name: 🗄️ Создание базы данных
+        run: |
+          python -c "from app import app, db; with app.app_context(): db.create_all()"
+      
+      - name: 🚀 Запуск приложения в фоне
+        run: |
+          python app.py &
+          sleep 5
+      
+      - name: 🧪 Запуск модульных тестов
+        run: |
+          python -m pytest tests/ -v --cov=. --cov-report=html
+      
+      - name: 📊 Загрузка отчета о покрытии
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov/
+      
+      - name: 🔍 Проверка работоспособности API
+        run: |
+          curl -f http://localhost:5000/api/products || exit 1
+          echo "✅ API работает"
